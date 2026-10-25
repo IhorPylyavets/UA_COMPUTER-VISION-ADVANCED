@@ -6,7 +6,7 @@ MDMT (Multi-Drone Multi-Target tracking) для заняття 9 — в artifact
 Звідси: MOT з рухомою камерою, SOT, ReID-пари «той самий / інший», крос-камерна асоціація.
 
     python tools/fetch_mdmt.py --list                 # які послідовності є і скільки важать (нічого не качає)
-    python tools/fetch_mdmt.py                        # пари 46 і 48: ДЕМО 01 §7 і ДЗ 9, ≈ 0.9 ГБ
+    python tools/fetch_mdmt.py                        # пари 46 і 48: ДЕМО 02 §7 і ДЗ 9, ≈ 0.9 ГБ
     python tools/fetch_mdmt.py --seqs 22 36 49        # конкретні пари (обидва дрони + розмітка)
     python tools/fetch_mdmt.py --all-pairs            # усі 17 повних пар val + test, ≈ 11 ГБ
 

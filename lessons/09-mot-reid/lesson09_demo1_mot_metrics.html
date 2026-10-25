@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MOTA, IDF1 і HOTA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F2F3F4; --panel: #FFFFFF; --line: #D6D9DC; --text: #16181A; --muted: #5C636B;
+  --blue: #1F6FD6; --teal: #0E9C8A; --amber: #C47A00; --red: #D63A3A; --violet: #6D4BD8; --grid: #E4E6E8; --stage: #FAFAFB;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "DejaVu Sans Mono", monospace;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #181919; --panel: #202121; --line: #333434; --text: #E8EAED; --muted: #9AA0A6;
+    --blue: #4A9EFF; --teal: #2DD4BF; --amber: #F59E0B; --red: #EF4444; --violet: #A78BFA; --grid: #262828; --stage: #141515;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #181919; --panel: #202121; --line: #333434; --text: #E8EAED; --muted: #9AA0A6;
+  --blue: #4A9EFF; --teal: #2DD4BF; --amber: #F59E0B; --red: #EF4444; --violet: #A78BFA; --grid: #262828; --stage: #141515;
+}
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 var(--sans); }
+
+.app { display: flex; flex-direction: column; gap: 14px; padding: 18px 16px 24px; max-width: 1240px; margin: 0 auto; }
+h1 { font: 600 26px/1.15 var(--mono); margin: 0; letter-spacing: -0.01em; }
+.lede { color: var(--muted); margin: 4px 0 0; max-width: 85ch; }
+
+button, select { font: 500 14px var(--sans); color: var(--text); background: var(--panel);
+                 border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+button:hover, select:hover { border-color: var(--muted); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.scenario { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.scenario select { flex: 0 1 360px; min-width: 0; font-weight: 600; }
+.scenario p { flex: 1 1 360px; margin: 0; font-size: 14px; color: var(--muted); }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; justify-content: space-between; }
+.tabs { display: flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.tabs button { border: 0; border-radius: 0; padding: 7px 16px; font: 600 13.5px var(--mono); background: transparent; }
+.tabs button + button { border-left: 1px solid var(--line); }
+.tabs button[aria-pressed="true"] { background: var(--lc, var(--text)); color: #fff; }
+.brush { display: flex; gap: 4px; align-items: center; }
+.brush .k { color: var(--muted); font-size: 13px; margin-right: 4px; }
+.brush button { width: 26px; height: 26px; padding: 0; border-radius: 6px; border: 2px solid transparent; font: 600 12px var(--mono); color: #fff; }
+.brush button[aria-pressed="true"] { border-color: var(--text); }
+.brush .miss { width: auto; padding: 0 8px; color: var(--text); background: var(--panel); border-color: var(--line); font-family: var(--sans); font-weight: 500; }
+.brush .miss[aria-pressed="true"] { border-color: var(--text); }
+
+.stage { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.stage canvas { display: block; width: 100%; touch-action: none; cursor: crosshair; }
+.lensnote { border-top: 1px solid var(--line); padding: 9px 14px 11px; font-size: 14px; }
+.lensnote .legend { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+.sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; vertical-align: -1px; margin: 0 4px 0 12px; }
+.legend .sw:first-child { margin-left: 0; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+       padding: 6px 9px; font: 12.5px/1.55 var(--mono); display: none; white-space: pre; box-shadow: 0 4px 16px rgba(0,0,0,.18); z-index: 2; }
+
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 12px;
+        padding: 12px 14px; cursor: pointer; text-align: left; font: inherit; color: inherit; min-width: 0;
+        display: flex; flex-direction: column; justify-content: flex-start; }
+.card[aria-pressed="true"] { outline: 2px solid var(--c); outline-offset: -1px; }
+.card .top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.card h2 { font: 600 15px var(--mono); margin: 0; color: var(--c); }
+.card .what { color: var(--muted); font-size: 12.5px; }
+.card .val { font: 600 34px/1.1 var(--mono); margin: 6px 0 2px; }
+.card .delta { font: 13px var(--mono); color: var(--muted); }
+.bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--grid); margin-top: 8px; }
+.bar span { display: block; height: 100%; }
+.cap { font-size: 12.5px; color: var(--muted); margin-top: 5px; }
+.sub { display: grid; grid-template-columns: 42px 1fr 40px; gap: 6px; align-items: center; font: 12.5px var(--mono); margin-top: 6px; }
+.sub .bar { margin: 0; }
+.formula { border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 8px; font: 12.5px/1.65 var(--mono); white-space: pre-wrap; }
+.formula .f { color: var(--text); font-weight: 600; }
+.formula .n { color: var(--muted); }
+.up { color: var(--teal) !important; } .down { color: var(--red) !important; }
+
+.compare { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13.5px; color: var(--muted); }
+.verdict { color: var(--text); }
+.verdict b { color: var(--amber); }
+footer { color: var(--muted); font-size: 12.5px; }
+
+@media (max-width: 760px) { .cards { grid-template-columns: 1fr; } h1 { font-size: 21px; } .tabs button { padding: 7px 10px; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>MOTA, IDF1 і HOTA на одній шкалі</h1>
+    <p class="lede">Три цілі в 80 кадрах і те, що з ними зробив трекер. Перемикайте метрику — шкала покаже, що саме вона вважає помилкою. LIVE DEMO 1 (слайд 10) — до слайда 9.</p>
+  </header>
+
+  <div class="scenario">
+    <select id="preset" aria-label="Сценарій"></select>
+    <p id="presetNote"></p>
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs" id="tabs" role="group" aria-label="Шкала очима метрики"></div>
+    <div class="brush" id="brush" role="group" aria-label="Пензель"><span class="k">малювати:</span></div>
+  </div>
+
+  <section class="stage" aria-label="Часова шкала треків">
+    <canvas id="timeline" aria-label="Смуги цілей A, B, C і хибних боксів; колір залежить від обраної метрики"></canvas>
+    <div class="lensnote" id="lensNote" aria-live="polite"></div>
+    <div class="tip" id="tip"></div>
+  </section>
+
+  <section class="cards" id="cards" aria-live="polite">
+    <button type="button" class="card" data-lens="mota" style="--c: var(--red)">
+      <div class="top"><h2>MOTA</h2><span class="what">усі помилки в одному «відрі»</span></div>
+      <div class="val" id="vMOTA"></div><div class="delta" id="dMOTA"></div>
+      <div class="bar" id="bMOTA"></div><div class="cap" id="cMOTA"></div>
+      <div class="formula" id="fMOTA"></div>
+    </button>
+    <button type="button" class="card" data-lens="idf1" style="--c: var(--amber)">
+      <div class="top"><h2>IDF1</h2><span class="what">один ID на весь трек</span></div>
+      <div class="val" id="vIDF1"></div><div class="delta" id="dIDF1"></div>
+      <div class="bar" id="bIDF1"></div><div class="cap" id="cIDF1"></div>
+      <div class="formula" id="fIDF1"></div>
+    </button>
+    <button type="button" class="card" data-lens="hota" style="--c: var(--teal)">
+      <div class="top"><h2>HOTA</h2><span class="what">√(DetA · AssA)</span></div>
+      <div class="val" id="vHOTA"></div><div class="delta" id="dHOTA"></div>
+      <div class="sub"><span style="color:var(--blue)">DetA</span><div class="bar" id="bDetA"></div><span id="tDetA"></span></div>
+      <div class="sub"><span style="color:var(--violet)">AssA</span><div class="bar" id="bAssA"></div><span id="tAssA"></span></div>
+      <div class="cap">смужки — середнє по всіх α</div>
+      <div class="formula" id="fHOTA"></div>
+    </button>
+  </section>
+
+  <div class="compare">
+    <button id="save" type="button">Запам'ятати для порівняння</button>
+    <span id="savedNote">Запам'ятайте один сценарій і перейдіть до іншого — у картках з'явиться різниця.</span>
+  </div>
+
+  <footer>Спрощено: кожен бокс трекера вже прив'язаний до своєї цілі, IoU боксів ≈ 0.85. HOTA — середнє по порогах IoU α від 0.05 до 0.95,
+    тому навіть ідеальний трекер має HOTA &lt; 1; смуга HOTA на шкалі показує α = 0.5. Для звітів і ДЗ — лише TrackEval.</footer>
+</div>
+
+<script>
+"use strict";
+// ───────────────────────── сцена
+const N = 80;
+const GT = [{ name: "A", from: 0, to: 79 }, { name: "B", from: 6, to: 73 }, { name: "C", from: 18, to: 79 }];
+const NFP = 2, IOU = 0.85;
+const ALPHAS = Array.from({ length: 19 }, (_, i) => +(0.05 * (i + 1)).toFixed(2));
+const ID_COLORS = ["#2F6FE0", "#0F9D7A", "#D48A00", "#D9413A", "#7A55E0", "#D6408F", "#0A93B5", "#5E9A12"];
+const idColor = id => ID_COLORS[(id - 1) % ID_COLORS.length];
+
+function blank() {
+  return { a: GT.map(g => Array.from({ length: N }, (_, f) => (f >= g.from && f <= g.to ? 0 : -1))),
+           fp: Array.from({ length: NFP }, () => new Array(N).fill(0)) };
+}
+function fill(st, g, from, to, id) { for (let f = from; f <= to; f++) if (st.a[g][f] !== -1) st.a[g][f] = id; }
+function perfect() { const st = blank(); GT.forEach((_, g) => fill(st, g, 0, N - 1, g + 1)); return st; }
+function switchAt(k) { const st = perfect(); fill(st, 0, k, N - 1, 4); return st; }
+const GAPS = [[30, 32], [42, 44], [54, 56], [66, 68]];
+
+const PRESETS = [
+  { name: "Ідеальний трекер", make: perfect, lens: "ids",
+    note: "Кожна ціль має один ID від початку до кінця. MOTA та IDF1 = 1; HOTA трохи нижча, бо враховує ще й точність боксів." },
+  { group: "Один ID switch: коли саме?" },
+  { name: "ID switch на кадрі 8", make: () => switchAt(8), lens: "idf1",
+    note: "Ціль A на кадрі 8 отримує новий ID. Для IDF1 це дешево: більшу частину треку ціль вела одним ID. Перемкніться на MOTA — там одна клітинка." },
+  { name: "ID switch на кадрі 40", make: () => switchAt(40), lens: "idf1",
+    note: "Та сама одна помилка посередині: для IDF1 половина треку A червона, для MOTA — одна клітинка. MOTA однакова для кадрів 8, 40 і 72." },
+  { name: "ID switch на кадрі 72", make: () => switchAt(72), lens: "idf1",
+    note: "Підміна наприкінці коштує мало: 72 кадри з 80 ще під правильним ID." },
+  { group: "Слайд 9: SORT проти BYTE" },
+  { name: "SORT: губить ціль в укритті, ID той самий", make: () => { const st = perfect(); fill(st, 0, 30, 49, 0); return st; }, lens: "hota",
+    note: "20 кадрів без бокса, але після укриття трек підхоплює ціль тим самим ID. Натисніть «Запам'ятати» внизу й перейдіть до «наївного» BYTE." },
+  { name: "«Наївний» BYTE: тримає в укритті, потім новий ID", make: () => { const st = perfect(); fill(st, 0, 50, N - 1, 4);
+      st.pen = {}; for (let f = 30; f <= 49; f++) st.pen["0:" + f] = 0.25; return st; }, lens: "hota",
+    note: "Слабкі бокси тримають ціль в укритті, але псують Калман — на виході новий ID. На смузі HOTA: верх (DetA) зелений, низ (AssA) — ні. MOTA росте, HOTA падає." },
+  { name: "BYTE (центр): тримає й не губить ID", make: perfect, lens: "hota",
+    note: "Слабкий бокс оновлює лише центр — ID переживає укриття. Кращий за всіма метриками, як у таблиці слайда 9." },
+  { group: "Інші типові відмови" },
+  { name: "Перехрестя: A і B обмінялися ID", make: () => { const st = perfect(); fill(st, 0, 40, N - 1, 2); fill(st, 1, 40, N - 1, 1); return st; }, lens: "hota",
+    note: "Дві цілі розійшлися з чужими ID. Для MOTA це 2 помилки на 210; для AssA (низ смуги HOTA) обидва треки «брудні» повністю." },
+  { name: "Фрагментація: 4 розриви, щоразу новий ID", make: () => {
+      const st = perfect(); GAPS.forEach(([a, b], i) => { fill(st, 2, a, b, 0); fill(st, 2, b + 1, N - 1, 5 + i); }); return st; }, lens: "hota",
+    note: "Ціль C чотири рази губиться на 3 кадри і щоразу народжується заново. Порівняйте з наступним сценарієм: пропусків стільки ж." },
+  { name: "Ті самі 4 розриви, ID повертається", make: () => { const st = perfect(); GAPS.forEach(([a, b]) => fill(st, 2, a, b, 0)); return st; }, lens: "hota",
+    note: "Ті самі 12 пропусків, але трек повертається з тим самим ID. Верх смуги HOTA такий самий, низ — чистий." },
+  { name: "Хибні треки: мерехтіння фону", make: () => {
+      const st = perfect(); const put = (r, a, b, id) => { for (let f = a; f <= b; f++) st.fp[r][f] = id; };
+      put(0, 10, 12, 5); put(0, 25, 27, 6); put(0, 50, 53, 7); put(1, 35, 38, 8); put(1, 74, 79, 2); return st; }, lens: "mota",
+    note: "Короткі треки на фоні і трек B, що після виходу цілі «приклеївся» до фону (ID 2 на кадрах 74–79). Кожен такий бокс — помилка FP." },
+];
+const LENSES = [{ key: "ids", name: "ID трекера", c: "--text" }, { key: "mota", name: "MOTA", c: "--red" },
+                { key: "idf1", name: "IDF1", c: "--amber" }, { key: "hota", name: "HOTA", c: "--teal" }];
+
+// ───────────────────────── метрики
+const $ = id => document.getElementById(id);
+let S = { st: perfect(), brush: 1, saved: null, m: null, hover: null, lens: "ids" };
+const iouOf = (g, f) => Math.min(0.99, Math.max(0.05, IOU + 0.06 * Math.sin(1.7 * f + 2.3 * g + 0.4) - ((S.st.pen && S.st.pen[g + ":" + f]) || 0)));
+
+// IDF1: глобальне зіставлення GT ↔ ID трекера, що максимізує IDTP (повний перебір — ID небагато)
+function bestAssign(M) {
+  const G = M.length, P = M.length ? M[0].length : 0, memo = new Map();
+  function go(g, mask) {
+    if (g === G) return { total: 0, pick: [] };
+    const key = g * 65536 + mask; if (memo.has(key)) return memo.get(key);
+    const skip = go(g + 1, mask); let best = { total: skip.total, pick: [-1, ...skip.pick] };
+    for (let p = 0; p < P; p++) if (!(mask & (1 << p)) && M[g][p] > 0) {
+      const r = go(g + 1, mask | (1 << p));
+      if (r.total + M[g][p] > best.total) best = { total: r.total + M[g][p], pick: [p, ...r.pick] };
+    }
+    memo.set(key, best); return best;
+  }
+  return go(0, 0);
+}
+
+function evaluate(st) {
+  const preds = []; let nGT = 0;
+  st.a.forEach((lane, g) => lane.forEach((v, f) => { if (v === -1) return; nGT++; if (v > 0) preds.push({ g, f, id: v, iou: iouOf(g, f) }); }));
+  st.fp.forEach(lane => lane.forEach((v, f) => { if (v > 0) preds.push({ g: -1, f, id: v, iou: 0 }); }));
+  const nPR = preds.length;
+  const gtCount = st.a.map(lane => lane.filter(v => v !== -1).length);
+  const prCount = new Map(); preds.forEach(p => prCount.set(p.id, (prCount.get(p.id) || 0) + 1));
+
+  // CLEAR MOT при IoU ≥ 0.5: підміна — коли ціль знову знайдена, але іншим ID, ніж востаннє
+  let tp = 0, idsw = 0; const swAt = [], swSet = new Set(), lastBefore = {};
+  st.a.forEach((lane, g) => { let last = null;
+    lane.forEach((v, f) => { if (v > 0 && iouOf(g, f) >= 0.5) { tp++;
+      if (last !== null && v !== last) { idsw++; swAt.push([g, f]); swSet.add(g + ":" + f); lastBefore[g + ":" + f] = last; } last = v; } }); });
+  const fn = nGT - tp, fp = nPR - tp;
+  const mota = nGT ? 1 - (fn + fp + idsw) / nGT : 0;
+
+  const ids = [...prCount.keys()].sort((x, y) => x - y);
+  const idtpM = st.a.map((lane, g) => ids.map(p => lane.reduce((c, v, f) => c + (v === p && iouOf(g, f) >= 0.5 ? 1 : 0), 0)));
+  const best = bestAssign(idtpM);
+  const assigned = best.pick.map(pi => (pi >= 0 ? ids[pi] : null));
+  const idf1 = nGT + nPR ? 2 * best.total / (nGT + nPR) : 0;
+
+  // HOTA: на кожному α — DetA = TP / (GT + PR − TP), AssA = середнє по TP від TPA / (|gt id| + |pr id| − TPA)
+  const per = ALPHAS.map(al => {
+    const tpa = new Map(); let ntp = 0;
+    preds.forEach(p => { if (p.g >= 0 && p.iou >= al) { ntp++; const k = p.g + ":" + p.id; tpa.set(k, (tpa.get(k) || 0) + 1); } });
+    const detA = ntp ? ntp / (nGT + nPR - ntp) : 0;
+    const A = new Map(); let ass = 0;
+    tpa.forEach((c, k) => { const [g, id] = k.split(":").map(Number); const a = c / (gtCount[g] + prCount.get(id) - c); A.set(k, { a, c }); ass += c * a; });
+    const assA = ntp ? ass / ntp : 0;
+    return { ntp, detA, assA, hota: Math.sqrt(detA * assA), A };
+  });
+  const mean = k => per.reduce((s, r) => s + r[k], 0) / per.length;
+  return { nGT, nPR, tp, fn, fp, idsw, swAt, swSet, lastBefore, mota, idf1, idtp: best.total, assigned, gtCount, prCount,
+           p50: per[9], hota: mean("hota"), detA: mean("detA"), assA: mean("assA") };
+}
+
+// ───────────────────────── кольори й canvas
+let COL = {};
+function readColors() { const cs = getComputedStyle(document.documentElement);
+  for (const k of ["text", "muted", "line", "grid", "blue", "teal", "amber", "red", "violet", "panel", "mono", "sans"]) COL[k] = cs.getPropertyValue("--" + k).trim(); }
+function mix(a, b, t) {
+  const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), A = p(a), B = p(b);
+  return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
+}
+// шкала якості 0 → 1: червоний → бурштиновий → бірюзовий
+const ramp = t => (t < 0.5 ? mix(COL.red, COL.amber, 2 * t) : mix(COL.amber, COL.teal, 2 * t - 1));
+function fit(canvas, cssH) {
+  if (cssH) canvas.style.height = cssH + "px";
+  const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== Math.round(r.width * dpr) || canvas.height !== Math.round(r.height * dpr)) {
+    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr); }
+  const ctx = canvas.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w: r.width, h: r.height };
+}
+
+// ───────────────────────── як кожна метрика бачить одну клітинку
+function look(kind, i, f) {
+  const m = S.m, v = kind === "gt" ? S.st.a[i][f] : S.st.fp[i][f];
+  if (v === -1 || (kind === "fp" && v === 0)) return null;
+  if (kind === "fp") return { mota: COL.red, idf1: COL.red, hota: [COL.red, null] };
+  const tp = v > 0 && iouOf(i, f) >= 0.5, A = tp ? m.p50.A.get(i + ":" + v) : null;
+  return { mota: m.swSet.has(i + ":" + f) ? COL.violet : tp ? COL.teal : COL.red,
+           idf1: tp && v === m.assigned[i] ? COL.teal : COL.red,
+           hota: [tp ? COL.teal : COL.red, A ? ramp(A.a) : null] };
+}
+function cellText(kind, i, f) {
+  const m = S.m, v = kind === "gt" ? S.st.a[i][f] : S.st.fp[i][f];
+  const head = `кадр ${f} · ${kind === "gt" ? "ціль " + GT[i].name : "без цілі"}`;
+  if (v === -1) return head + "\nцілі в кадрі немає";
+  if (kind === "fp") return v === 0 ? head : head + ` · ID ${v}\nMOTA  хибний бокс: +1 помилка\nIDF1  ID ${v} без своєї цілі\nHOTA  знижує DetA`;
+  if (v === 0) return head + ` · бокса немає\nMOTA  пропуск: +1 помилка\nIDF1  ціль без свого ID\nHOTA  знижує DetA`;
+  const key = i + ":" + f, own = m.assigned[i];
+  let t = head + ` · ID ${v}`;
+  t += m.swSet.has(key) ? `\nMOTA  підміна ${m.lastBefore[key]} → ${v}: +1, рахується один раз` : "\nMOTA  усе гаразд";
+  t += v === own ? `\nIDF1  «свій» ID для цілі ${GT[i].name}` : `\nIDF1  чужий ID: цілі ${GT[i].name} належить ID ${own ?? "—"}`;
+  const A = m.p50.A.get(i + ":" + v);
+  if (A) t += `\nHOTA  знайдено; чистота пари ${GT[i].name}–ID ${v}: A = ${A.a.toFixed(2)}`;
+  return t;
+}
+
+// ───────────────────────── часова шкала
+function layout(w) {
+  const left = 72, right = 10, top = 24, cw = (w - left - right) / N, lanes = []; let y = top;
+  GT.forEach((g, i) => { lanes.push({ kind: "gt", i, y, h: 32 }); y += 42; });
+  y += 8;
+  for (let r = 0; r < NFP; r++) { lanes.push({ kind: "fp", i: r, y, h: 18 }); y += 22; }
+  return { left, cw, lanes, height: y + 6 };
+}
+let L = null;
+function drawTimeline() {
+  const canvas = $("timeline"), w = canvas.getBoundingClientRect().width;
+  L = layout(w);
+  const { ctx } = fit(canvas, L.height), { left, cw, lanes } = L, m = S.m, lens = S.lens;
+  ctx.clearRect(0, 0, w, L.height);
+  ctx.font = "11.5px " + COL.mono; ctx.textBaseline = "middle"; ctx.fillStyle = COL.muted; ctx.textAlign = "center";
+  for (let f = 0; f <= N; f += 10) ctx.fillText(String(f), left + f * cw, 10);
+  if (S.hover) { ctx.fillStyle = COL.grid; ctx.fillRect(left + S.hover.f * cw, 18, cw, L.height - 18); }
+  const hatch = (x, y, wd, h, color) => { ctx.save(); ctx.beginPath(); ctx.rect(x, y, wd, h); ctx.clip(); ctx.strokeStyle = color; ctx.lineWidth = 1.2;
+    for (let k = -h; k < wd + h; k += 5) { ctx.beginPath(); ctx.moveTo(x + k, y + h); ctx.lineTo(x + k + h, y); ctx.stroke(); } ctx.restore(); };
+  // клітинки малюємо відрізками однакового кольору — без сітки, щоб шкала читалась як смуги
+  const run = (y, h, colorAt) => { let f = 0;
+    while (f < N) { const c = colorAt(f); let e = f + 1; while (e < N && colorAt(e) === c) e++;
+      if (c) { if (c.hatch) hatch(left + f * cw, y, (e - f) * cw, h, c.hatch); else { ctx.fillStyle = c; ctx.fillRect(left + f * cw, y, (e - f) * cw, h); } }
+      f = e; } };
+  const cache = new Map(), hatchRed = { hatch: COL.red }, hatchGrey = { hatch: COL.line };
+  lanes.forEach(ln => {
+    const cells = ln.kind === "gt" ? S.st.a[ln.i] : S.st.fp[ln.i];
+    ctx.textAlign = "left"; ctx.font = (ln.kind === "gt" ? "600 13px " : "12px ") + COL.mono; ctx.fillStyle = ln.kind === "gt" ? COL.text : COL.muted;
+    const label = ln.kind === "fp" ? (ln.i ? "" : "без цілі") : lens === "idf1" && m.assigned[ln.i] ? `${GT[ln.i].name} → ${m.assigned[ln.i]}`
+                : lens === "hota" ? GT[ln.i].name : "ціль " + GT[ln.i].name;
+    ctx.fillText(label, 4, ln.y + ln.h / 2);
+    if (ln.kind === "fp") { ctx.strokeStyle = COL.line; ctx.setLineDash([3, 4]); ctx.strokeRect(left, ln.y, N * cw, ln.h); ctx.setLineDash([]); }
+    else { ctx.fillStyle = COL.grid; const g = GT[ln.i]; ctx.fillRect(left + g.from * cw, ln.y, (g.to - g.from + 1) * cw, ln.h); }
+    if (lens === "ids") {
+      run(ln.y, ln.h, f => { const v = cells[f]; if (v === -1) return null; if (v === 0) return ln.kind === "gt" ? hatchRed : null; return idColor(v); });
+      ctx.font = "600 12px " + COL.mono; ctx.fillStyle = "#fff";
+      cells.forEach((v, f) => { if (v > 0 && (f === 0 || cells[f - 1] !== v)) { let n = 0; while (f + n < N && cells[f + n] === v) n++;
+        if (n * cw >= 14) ctx.fillText(String(v), left + f * cw + 4, ln.y + ln.h / 2 + 0.5); } });
+      return;
+    }
+    const lk = f => { const k = ln.kind + ln.i + ":" + f; if (!cache.has(k)) cache.set(k, look(ln.kind, ln.i, f)); return cache.get(k); };
+    if (lens === "hota") {
+      run(ln.y, ln.h / 2 - 1, f => { const l = lk(f); return l && l.hota[0]; });
+      run(ln.y + ln.h / 2 + 1, ln.h / 2 - 1, f => { const l = lk(f); if (!l) return null; return l.hota[1] || (ln.kind === "gt" ? hatchGrey : null); });
+    } else run(ln.y, ln.h, f => { const l = lk(f); return l && l[lens]; });
+  });
+  if (lens === "hota") { ctx.font = "10.5px " + COL.mono; ctx.fillStyle = COL.muted; ctx.textAlign = "right";
+    lanes.filter(l => l.kind === "gt").forEach(ln => { ctx.fillText("Det", left - 3, ln.y + ln.h * 0.25); ctx.fillText("Ass", left - 3, ln.y + ln.h * 0.75); }); }
+  if (lens === "ids" || lens === "mota") { ctx.fillStyle = lens === "mota" ? COL.violet : COL.red;
+    m.swAt.forEach(([g, f]) => { const ln = lanes[g], x = left + f * cw + cw / 2;
+      ctx.beginPath(); ctx.moveTo(x - 6, ln.y - 9); ctx.lineTo(x + 6, ln.y - 9); ctx.lineTo(x, ln.y - 1); ctx.fill(); }); }
+}
+function cellAt(ev) {
+  if (!L) return null; const r = $("timeline").getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+  const f = Math.floor((x - L.left) / L.cw); if (f < 0 || f >= N) return null;
+  const ln = L.lanes.find(l => y >= l.y - 4 && y <= l.y + l.h + 4); return ln ? { ln, f, x, y } : null;
+}
+function paint(c) {
+  const { ln, f } = c, id = S.brush;
+  if (ln.kind === "gt" && S.st.a[ln.i][f] === -1) return false;
+  const cur = ln.kind === "gt" ? S.st.a[ln.i][f] : S.st.fp[ln.i][f];
+  if (cur === id) return false;
+  if (id > 0) {                                           // один ID — один бокс у кадрі: з іншої смуги його прибираємо
+    S.st.a.forEach(lane => { if (lane[f] === id) lane[f] = 0; });
+    S.st.fp.forEach(lane => { if (lane[f] === id) lane[f] = 0; });
+  }
+  if (ln.kind === "gt") S.st.a[ln.i][f] = id; else S.st.fp[ln.i][f] = id;
+  return true;
+}
+
+// ───────────────────────── тексти й картки
+const sw = c => `<span class="sw" style="background:${c}"></span>`;
+const f3 = v => v.toFixed(3);
+function drawLensNote() {
+  const m = S.m, own = GT.map((g, i) => `${g.name} → ${m.assigned[i] ?? "—"}`).join(", ");
+  const notes = {
+    ids: ["Колір — ID трекера, що вів ціль у цьому кадрі. Перемкніть метрику вгорі, щоб побачити ту саму шкалу її очима.",
+          `${sw(COL.red)}штриховка — ціль у кадрі, бокса немає · ▼ — ID switch`],
+    mota: [`<b>MOTA</b> рахує помилки поштучно: пропуск, хибний бокс і підміна важать однаково. ` +
+           `Підміна — одна фіолетова клітинка, хоч би скільки кадрів після неї ціль вів чужий ID.`,
+           `${sw(COL.teal)}без помилки ${sw(COL.red)}пропуск або хибний бокс ${sw(COL.violet)}підміна ID`],
+    idf1: [`<b>IDF1</b> закріплює за кожною ціллю один ID на весь час (${own}) і рахує кадри, де ціль має саме його. ` +
+           `Ціна підміни — усі кадри після неї.`,
+           `${sw(COL.teal)}«свій» ID ${sw(COL.red)}чужий ID, пропуск або хибний бокс`],
+    hota: [`<b>HOTA</b> = √(DetA · AssA). Верхня половина смуги — DetA: чи знайдено ціль. Нижня — AssA: наскільки «чиста» пара ціль–ID ` +
+           `за весь трек. Якщо ID ділить ціль з іншим ID, «брудним» стає весь трек, а не лише кадри після підміни.`,
+           `верх: ${sw(COL.teal)}знайдено ${sw(COL.red)}ні · низ: ${sw(COL.teal)}чиста пара ${sw(ramp(0.5))}наполовину ${sw(COL.red)}брудна`],
+  };
+  const [a, b] = notes[S.lens];
+  $("lensNote").innerHTML = `${a}<div class="legend">${b}</div>`;
+}
+const bar = parts => parts.filter(([n]) => n > 0).map(([n, c, tot]) => `<span style="width:${100 * n / tot}%;background:${c}"></span>`).join("");
+function drawCards() {
+  const m = S.m, sv = S.saved && S.saved.m;
+  [["MOTA", "mota"], ["IDF1", "idf1"], ["HOTA", "hota"]].forEach(([n, k]) => {
+    $("v" + n).textContent = m[k].toFixed(3);
+    const d = $("d" + n); d.className = "delta"; d.textContent = "";
+    if (sv) { const dv = m[k] - sv[k]; d.textContent = Math.abs(dv) < 5e-4 ? "= як у збереженому" : `${dv > 0 ? "+" : "−"}${Math.abs(dv).toFixed(3)} до збереженого`;
+      if (Math.abs(dv) >= 5e-4) d.classList.add(dv > 0 ? "up" : "down"); }
+  });
+  const errs = m.fn + m.fp + m.idsw, tot = Math.max(m.nGT, errs);
+  $("bMOTA").innerHTML = bar([[m.fn + m.fp, COL.red, tot], [m.idsw, COL.violet, tot], [Math.max(0, m.nGT - errs), COL.teal, tot]]);
+  $("cMOTA").textContent = `пропуски ${m.fn} · хибні ${m.fp} · підміни ${m.idsw} — ${errs} з ${m.nGT}`;
+  const t2 = m.nGT + m.nPR;
+  $("bIDF1").innerHTML = bar([[2 * m.idtp, COL.teal, t2], [t2 - 2 * m.idtp, COL.red, t2]]);
+  $("cIDF1").textContent = `${m.idtp} кадрів під «своїм» ID з ${m.nGT}`;
+  $("bDetA").innerHTML = bar([[m.detA, COL.blue, 1]]); $("tDetA").textContent = m.detA.toFixed(2);
+  $("bAssA").innerHTML = bar([[m.assA, COL.violet, 1]]); $("tAssA").textContent = m.assA.toFixed(2);
+  // формули з підстановкою поточних чисел
+  const p = m.p50;
+  $("fMOTA").innerHTML = `<span class="f">MOTA = 1 − (FN + FP + IDSW) / GT</span>\n` +
+    `     = 1 − (${m.fn} + ${m.fp} + ${m.idsw}) / ${m.nGT} = ${f3(m.mota)}\n` +
+    `<span class="n">FN — пропуски, FP — хибні бокси, IDSW — підміни, GT — боксів цілей</span>`;
+  $("fIDF1").innerHTML = `<span class="f">IDF1 = 2·IDTP / (GT + PR)</span>\n` +
+    `     = 2·${m.idtp} / (${m.nGT} + ${m.nPR}) = ${f3(m.idf1)}\n` +
+    `<span class="n">IDTP — кадри під «своїм» ID, PR — боксів трекера</span>`;
+  $("fHOTA").innerHTML = `<span class="f">HOTA = середнє по α √(DetA<sub>α</sub> · AssA<sub>α</sub>)</span>\n` +
+    `<span class="n">при α = 0.5:</span>\n` +
+    `DetA = TP / (GT + PR − TP)\n     = ${p.ntp} / (${m.nGT} + ${m.nPR} − ${p.ntp}) = ${p.detA.toFixed(2)}\n` +
+    `AssA = середнє по TP від A = ${p.assA.toFixed(2)}\n` +
+    `  A = TPA / (кадри цілі + кадри ID − TPA)\n` +
+    `HOTA = √(${p.detA.toFixed(2)} · ${p.assA.toFixed(2)}) = ${p.hota.toFixed(2)}\n` +
+    `<span class="n">середнє по 19 α (0.05…0.95) = ${f3(m.hota)}</span>`;
+  [...$("cards").children].forEach(c => c.setAttribute("aria-pressed", String(c.dataset.lens === S.lens)));
+  [...$("tabs").children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lens === S.lens)));
+
+  if (sv) {
+    const sgn = x => (Math.abs(x) < 5e-4 ? 0 : Math.sign(x)), a = sgn(m.mota - sv.mota), b = sgn(m.idf1 - sv.idf1), c = sgn(m.hota - sv.hota);
+    let v = `Порівняння з «${S.saved.name}».`;
+    if (a !== 0 && ((b && b !== a) || (c && c !== a))) v += ` <b>Метрики не згодні:</b> MOTA каже «${a > 0 ? "краще" : "гірше"}», а IDF1 і HOTA — «${a > 0 ? "гірше" : "краще"}».`;
+    else if (a === 0 && (b || c)) v += ` <b>MOTA не бачить різниці</b> — помилка в ідентичності, а не в детекції.`;
+    $("savedNote").innerHTML = `<span class="verdict">${v}</span>`;
+    $("save").textContent = "Забути збережене";
+  } else {
+    $("savedNote").textContent = "Запам'ятайте один сценарій і перейдіть до іншого — у картках з'явиться різниця.";
+    $("save").textContent = "Запам'ятати для порівняння";
+  }
+}
+
+function render() { S.m = evaluate(S.st); drawTimeline(); drawLensNote(); drawCards(); }
+let raf = 0; const schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; render(); }); };
+
+// ───────────────────────── керування
+PRESETS.forEach((p, i) => {
+  if (p.group) { const g = document.createElement("optgroup"); g.label = p.group; $("preset").append(g); return; }
+  const o = document.createElement("option"); o.value = i; o.textContent = p.name;
+  ($("preset").lastElementChild && $("preset").lastElementChild.tagName === "OPTGROUP" ? $("preset").lastElementChild : $("preset")).append(o);
+});
+function applyPreset(i) { const p = PRESETS[i]; S.st = p.make(); S.lens = p.lens || S.lens; $("presetNote").textContent = p.note; $("preset").value = i; schedule(); }
+$("preset").addEventListener("change", e => applyPreset(+e.target.value));
+
+LENSES.forEach(l => { const b = document.createElement("button"); b.type = "button"; b.textContent = l.name; b.dataset.lens = l.key;
+  b.style.setProperty("--lc", `var(${l.c})`); b.addEventListener("click", () => { S.lens = l.key; schedule(); }); $("tabs").append(b); });
+$("cards").addEventListener("click", e => { const c = e.target.closest(".card"); if (c) { S.lens = S.lens === c.dataset.lens ? "ids" : c.dataset.lens; schedule(); } });
+
+for (let id = 1; id <= 8; id++) { const b = document.createElement("button"); b.type = "button"; b.style.background = idColor(id);
+  b.textContent = id; b.dataset.id = id; b.setAttribute("aria-label", "ID " + id); $("brush").append(b); }
+{ const b = document.createElement("button"); b.type = "button"; b.className = "miss"; b.dataset.id = 0; b.textContent = "стерти"; $("brush").append(b); }
+const syncBrush = () => [...$("brush").querySelectorAll("button")].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.id === S.brush)));
+$("brush").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.brush = +b.dataset.id; syncBrush(); });
+
+$("save").addEventListener("click", () => {
+  if (S.saved) S.saved = null;
+  else { const sel = $("preset").selectedOptions[0]; S.saved = { m: S.m, name: sel ? sel.textContent : "" }; }
+  schedule(); });
+
+const tl = $("timeline"); let painting = false;
+tl.addEventListener("pointerdown", e => { const c = cellAt(e); if (!c) return; tl.setPointerCapture(e.pointerId); painting = c.ln;
+  if (paint(c)) schedule(); });
+tl.addEventListener("pointermove", e => {
+  const c = cellAt(e), tip = $("tip");
+  if (painting && c && c.ln === painting && paint(c)) { S.m = evaluate(S.st); schedule(); }
+  const hv = c ? { f: c.f } : null; if (JSON.stringify(hv) !== JSON.stringify(S.hover)) { S.hover = hv; schedule(); }
+  if (!c || !S.m) { tip.style.display = "none"; return; }
+  tip.textContent = cellText(c.ln.kind, c.ln.i, c.f); tip.style.display = "block";
+  const r = tl.getBoundingClientRect(), sh = tl.parentElement.clientHeight, th = tip.offsetHeight;
+  tip.style.left = Math.max(6, Math.min(c.x + 14, r.width - tip.offsetWidth - 6)) + "px";
+  tip.style.top = (c.y + 16 + th > sh ? Math.max(4, c.y - th - 10) : c.y + 16) + "px";
+});
+const stop = () => { painting = false; };
+tl.addEventListener("pointerup", stop); tl.addEventListener("pointercancel", stop);
+tl.addEventListener("pointerleave", () => { if (!painting) { S.hover = null; $("tip").style.display = "none"; schedule(); } });
+
+new ResizeObserver(schedule).observe(document.body);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); schedule(); });
+document.fonts && document.fonts.ready.then(schedule);
+readColors(); syncBrush();
+applyPreset(0);
+</script>
+</body>
+</html>

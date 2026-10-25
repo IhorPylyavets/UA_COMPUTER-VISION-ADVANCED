@@ -1,10 +1,10 @@
 """mdmt.py — MDMT (CVAT XML) → кадри для ноутбуків і формат MOTChallenge для TrackEval.
 
-Дані: python tools/fetch_mdmt.py --seqs 46 48  (лягають в artifacts/mdmt/; 48 — демо 1 §7, 46 і 48 — ДЗ 9).
+Дані: python tools/fetch_mdmt.py --seqs 46 48  (лягають в artifacts/mdmt/; 48 — демо 2 §7, 46 і 48 — ДЗ 9).
 
 У ноутбуці:
     from mdmt import load_seq, run_trackeval, export_trackeval, write_tracker
-    frames = load_seq("46", drone=1)            # [[(id, cx, cy, w, h), ...] для кожного кадру] — як make_gt у демо 1
+    frames = load_seq("46", drone=1)            # [[(id, cx, cy, w, h), ...] для кожного кадру] — як make_gt у демо 2
     run_trackeval({"46-1": frames}, {"BYTE": {"46-1": hyp}})   # HOTA / DetA / AssA / MOTA / IDF1 одразу зі списків
     export_trackeval(["46", "48"])              # або GT у структурі TrackEval на диску — для запуску TrackEval окремо
     write_tracker(hyp, "46", 1, "BYTE")         # hyp = [(t, id, cx, cy, w, h), ...] — вихід run_tracker
@@ -85,7 +85,7 @@ def load_boxes(seq: str, drone: int, classes: Optional[Iterable[str]] = None, ro
 
 def load_seq(seq: str, drone: int, classes: Optional[Iterable[str]] = None,
              root: Path = ROOT) -> List[List[Tuple[int, float, float, float, float]]]:
-    """GT у форматі make_gt з демо 1: для кожного кадру список (id, cx, cy, w, h)."""
+    """GT у форматі make_gt з демо 2: для кожного кадру список (id, cx, cy, w, h)."""
     boxes = load_boxes(seq, drone, classes, root)
     n = len(list(frames_dir(seq, drone, root).glob("*.jpg")))
     frames: List[list] = [[] for _ in range(n)]
