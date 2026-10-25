@@ -2,7 +2,7 @@
 
 До [заняття 9](../../lessons/09-mot-reid/). ≈ 3 години, 20 балів.
 
-Ноутбук: [`03_mtmc_tracker_student.ipynb`](03_mtmc_tracker_student.ipynb), ядро **Python (cv-advanced)**.
+Ноутбук: [`04_mtmc_tracker_student.ipynb`](04_mtmc_tracker_student.ipynb), ядро **Python (cv-advanced)**.
 GPU не обов'язковий: повний прогін — ≈ 1 хв на GPU і ≈ 2–5 хв на CPU.
 
 Дані й ваги (≈ 1,3 ГБ) — один раз, з кореня репозиторію:

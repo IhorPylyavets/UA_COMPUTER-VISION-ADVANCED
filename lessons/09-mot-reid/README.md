@@ -26,7 +26,7 @@ pip install git+https://github.com/JonathonLuiten/TrackEval.git       # HOTA / D
 
 ## Домашнє завдання
 
-[`homework/03-mot-reid/`](../../homework/03-mot-reid/) — крос-камерний трекер на MDMT: один ID у двох дронах (трекер на камері,
+[`homework/04-mot-reid/`](../../homework/04-mot-reid/) — крос-камерний трекер на MDMT: один ID у двох дронах (трекер на камері,
 часове вікно, гомографія між дронами, ReID, три зони порогів, HOTA по мережі й абляція). Спільний код ДЗ — `mtmc.py`.
 
 ## Очікувані числа (повні версії)

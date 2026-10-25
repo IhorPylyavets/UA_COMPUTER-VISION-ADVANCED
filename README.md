@@ -18,7 +18,7 @@
 | 6 | [Zero-shot сегментація та Open-Vocabulary детекція](lessons/06-zero-shot-segmentation/) | 2 | [✔](homework/02-grounded-sam2-video/) |
 | 7 | Генеративні моделі в CV: принципи | 2 |  |
 | 8 | Адаптація, керування та синтез даних | 2 | [✔](homework/03-diffusion-lora/) |
-| 9 | Multi-Object Tracking та Re-Identification | 3 | ✔ |
+| 9 | [Multi-Object Tracking та Re-Identification](lessons/09-mot-reid/) | 3 | [✔](homework/04-mot-reid/) |
 | 10 | Відео-пайплайни та low-latency стрімінг | 3 |  |
 | 11 | Крос-сенсорна інтеграція: RGB + LiDAR / Radar | 4 | ✔ |
 | 12 | Мультиспектральне злиття: RGB + тепловізори | 4 |  |
@@ -184,7 +184,8 @@ pip install -r requirements.txt
 
 ## Фінальний проєкт
 
-Наскрізна робота, захист на занятті 19. Треки:
+Наскрізна робота, захист на занятті 19. Вимоги до проєкту й оцінювання — у
+[`docs/Final project requirements.pdf`](docs/Final%20project%20requirements.pdf). Треки:
 
 1. **Семантичний пошук зображень** — CLIP + Grounding DINO + FAISS/Qdrant, метрика Recall@K.
 2. **Синтетичні дані для рідкісних класів** — SAM 2 + ControlNet + SD, доведений приріст F1.
