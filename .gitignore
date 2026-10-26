@@ -28,6 +28,7 @@ artifacts/kitti/**
 artifacts/middlebury/**
 artifacts/calibration_demo/**
 artifacts/visdrone/**
+artifacts/mdmt/**
 artifacts/aerial_video/**
 lessons/05-vit-multimodal/gt/own_queries.csv
 backup

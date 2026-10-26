@@ -35,6 +35,11 @@ lap>=0.5.12            # ByteTrack в ultralytics (demo3); без нього ult
 SAM-2 @ git+https://github.com/facebookresearch/sam2.git
 clip @ git+https://github.com/ultralytics/CLIP.git   # текстовий енкодер для YOLO-World
 
+# Заняття 9 · MOT та ReID
+# HOTA / DetA / AssA (demo1 §7, ДЗ); на PyPI офіційного пакета немає. Під numpy ≥ 1.24 його лагодить lessons/09-mot-reid/mdmt.py
+trackeval @ git+https://github.com/JonathonLuiten/TrackEval.git
+requests               # tools/fetch_mdmt.py — читає з архіву MDMT лише потрібні файли через HTTP Range
+
 # Окремими venv, бо конфліктують між собою:
 #   заняття 4, 11       — pycolmap
 #   заняття 7, 8        — diffusers, accelerate, peft, controlnet-aux
