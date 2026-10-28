@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GOP проти intra-refresh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F2F3F4; --panel: #FFFFFF; --line: #D6D9DC; --text: #16181A; --muted: #5C636B;
+  --blue: #1F6FD6; --teal: #0E9C8A; --amber: #C47A00; --red: #D63A3A; --violet: #6D4BD8; --grid: #E4E6E8; --stage: #FAFAFB;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "DejaVu Sans Mono", monospace;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #181919; --panel: #202121; --line: #333434; --text: #E8EAED; --muted: #9AA0A6;
+    --blue: #4A9EFF; --teal: #2DD4BF; --amber: #F59E0B; --red: #EF4444; --violet: #A78BFA; --grid: #262828; --stage: #141515;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #181919; --panel: #202121; --line: #333434; --text: #E8EAED; --muted: #9AA0A6;
+  --blue: #4A9EFF; --teal: #2DD4BF; --amber: #F59E0B; --red: #EF4444; --violet: #A78BFA; --grid: #262828; --stage: #141515;
+}
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 var(--sans); }
+
+.app { display: flex; flex-direction: column; gap: 14px; padding: 18px 16px 24px; max-width: 1240px; margin: 0 auto; }
+h1 { font: 600 26px/1.15 var(--mono); margin: 0; letter-spacing: -0.01em; }
+.lede { color: var(--muted); margin: 4px 0 0; max-width: 85ch; }
+
+select, input[type="checkbox"] { font: 500 14px var(--sans); color: var(--text); background: var(--panel);
+                 border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+select:hover { border-color: var(--muted); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.scenario { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.scenario select { flex: 0 1 380px; min-width: 0; font-weight: 600; }
+.scenario p { flex: 1 1 360px; margin: 0; font-size: 14px; color: var(--muted); }
+
+.controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px 18px;
+            background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.ctl { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ctl .k { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+.ctl .k b { font: 600 13px var(--mono); color: var(--text); }
+.ctl input[type="range"] { width: 100%; accent-color: var(--teal); }
+.ctl.check { flex-direction: row; align-items: center; gap: 8px; font-size: 13.5px; }
+.ctl.check input { width: 18px; height: 18px; padding: 0; accent-color: var(--red); }
+
+.stage { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.stage canvas { display: block; width: 100%; touch-action: none; cursor: crosshair; }
+.lensnote { border-top: 1px solid var(--line); padding: 9px 14px 11px; font-size: 14px; }
+.lensnote .legend { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+.sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; vertical-align: -1px; margin: 0 4px 0 12px; }
+.legend .sw:first-child { margin-left: 0; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+       padding: 6px 9px; font: 12.5px/1.55 var(--mono); display: none; white-space: pre; box-shadow: 0 4px 16px rgba(0,0,0,.18); z-index: 2; }
+
+.frames { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.frame { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.frame h3 { font: 600 13.5px var(--mono); margin: 0 0 6px; color: var(--c); }
+.frame canvas { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; }
+.frame .cap { font-size: 12.5px; color: var(--muted); margin-top: 6px; min-height: 2.9em; }
+
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 12px;
+        padding: 12px 14px; min-width: 0; }
+.card .top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.card h2 { font: 600 15px var(--mono); margin: 0; color: var(--c); }
+.card .what { color: var(--muted); font-size: 12.5px; text-align: right; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: baseline; margin-top: 7px; }
+.row .l { color: var(--muted); font-size: 13px; }
+.row .v { font: 600 20px var(--mono); }
+.row .v small { font-size: 13px; color: var(--muted); font-weight: 400; }
+.formula { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+           font: 13px/1.7 var(--mono); white-space: pre-wrap; overflow-x: auto; }
+.formula .f { color: var(--text); font-weight: 600; }
+.formula .n { color: var(--muted); }
+.warn { color: var(--red); font-weight: 600; }
+footer { color: var(--muted); font-size: 12.5px; }
+
+@media (max-width: 760px) { .cards, .frames { grid-template-columns: 1fr; } h1 { font-size: 21px; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>GOP з IDR проти intra-refresh на вузькому лінку</h1>
+    <p class="lede">Модель черги на відправнику: кожен кадр серіалізується в лінк ємністю C, великий I-кадр затримує всі наступні.
+      Веб-демо 03 до слайдів 23 і 25; LIVE DEMO 2 (слайд 24) міряє те саме на справжньому x264. Наведіть на графік — нижче з'явиться кадр,
+      який у цей момент бачить оператор; клік фіксує момент.</p>
+  </header>
+
+  <div class="scenario">
+    <select id="preset" aria-label="Сценарій"></select>
+    <p id="presetNote"></p>
+  </div>
+
+  <section class="controls" id="controls" aria-label="Параметри"></section>
+
+  <section class="stage" aria-label="Розмір кадру, затримка і стан картинки в часі">
+    <canvas id="plot" aria-label="Три графіки зі спільною віссю часу: розмір кадру, затримка кадру, стан картинки для трьох варіантів енкодера"></canvas>
+    <div class="lensnote">
+      <div class="legend">
+        <span class="sw" style="background:var(--red)"></span>GOP, чекаємо IDR
+        <span class="sw" style="background:var(--amber)"></span>GOP + IDR на вимогу (PLI)
+        <span class="sw" style="background:var(--teal)"></span>intra-refresh
+        <span class="sw" style="background:var(--red);opacity:.25"></span>серія втрат
+        · смуги стану: <span class="sw" style="background:var(--red)"></span>кадр не дійшов (картинка застигла)
+        <span class="sw" style="background:var(--amber)"></span>артефакти (яскравіше — більша площа)
+      </div>
+    </div>
+    <div class="tip" id="tip"></div>
+  </section>
+
+  <section class="frames" aria-live="polite">
+    <div class="frame" style="--c: var(--red)"><h3>GOP, чекаємо IDR</h3><canvas id="fGop"></canvas><div class="cap" id="cGop"></div></div>
+    <div class="frame" style="--c: var(--amber)"><h3>GOP + PLI</h3><canvas id="fPli"></canvas><div class="cap" id="cPli"></div></div>
+    <div class="frame" style="--c: var(--teal)"><h3>intra-refresh</h3><canvas id="fIr"></canvas><div class="cap" id="cIr"></div></div>
+  </section>
+
+  <section class="cards" id="cards" aria-live="polite"></section>
+
+  <section class="formula" id="formula" aria-live="polite"></section>
+
+  <footer>Модель, не бенчмарк. Затримка кадру тут — лише черга і серіалізація на відправнику (кодування, мережа і декодування сталі й
+    не показані). Розмір P-кадру має шум ±7 %; середній бітрейт R обох енкодерів однаковий. Кадр втрачено, якщо його передача перетинає
+    серію втрат; далі в GOP-варіантах помилка тягнеться до першого неушкодженого I-кадру, а intra-refresh лікує картинку смугою за
+    цикл з GOP кадрів. PLI: приймач чекає max(30 мс, 1.5 кадру) тиші після останньої втрати, запит іде RTT / 2, енкодер робить IDR
+    на наступному кадрі. Числа справжнього x264 — у LIVE DEMO 2.</footer>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const DUR = 5.0;                                   // секунд на графіку
+
+// ───────────────────────── параметри і сценарії
+const CTL = [
+  { key: "R", label: "бітрейт відео R", min: 0.3, max: 8, step: 0.1, fmt: v => v.toFixed(1) + " Mbps" },
+  { key: "C", label: "ємність лінку C", min: 0.5, max: 10, step: 0.1, fmt: v => v.toFixed(1) + " Mbps" },
+  { key: "ip", label: "I-кадр / P-кадр", min: 1, max: 15, step: 0.5, fmt: v => "× " + v.toFixed(1) },
+  { key: "G", label: "GOP (цикл intra-refresh)", min: 10, max: 120, step: 5, fmt: v => v + " кадрів" },
+  { key: "fps", label: "частота кадрів", min: 15, max: 60, step: 5, fmt: v => v + " fps" },
+  { key: "b0", label: "початок серії втрат", min: 0.3, max: 4, step: 0.05, fmt: v => v.toFixed(2) + " с" },
+  { key: "blen", label: "тривалість серії", min: 0, max: 600, step: 10, fmt: v => v + " мс" },
+  { key: "rtt", label: "RTT для PLI", min: 10, max: 400, step: 10, fmt: v => v + " мс" },
+];
+const BASE = { R: 3.2, C: 4, ip: 6, G: 30, fps: 30, b0: 2.4, blen: 150, rtt: 80, burst: true };
+const PRESETS = [
+  { name: "Слайд 23: 3.2 Mbps на лінку 4 Mbps (80 %)", p: {},
+    note: "Модель зі слайда: I ≈ 6 × P. Кожен IDR дає пік ≈ 130 мс, після якого черга розсмоктується кількасот мілісекунд; intra-refresh тримає ≈ 27 мс. Серія втрат 150 мс посередині GOP." },
+  { name: "LIVE DEMO 2: 0.8 на 1 Mbps, I / P ≈ 10", p: { R: 0.8, C: 1, ip: 10, b0: 3.4 },
+    note: "Те саме навантаження 80 %, але виміряне на справжньому x264 співвідношення I / P ≈ 10: пік уже ≈ 200 мс. У ноутбуці p99 — 285 мс: перший IDR там ще більший (35 КБ), а розмір кадрів x264 гуляє сильніше, ніж у моделі." },
+  { name: "Лінк із запасом: 3.2 на 8 Mbps (40 %)", p: { C: 8 },
+    note: "Той самий енкодер на вдвічі ширшому лінку: пік IDR удвічі менший і не накопичується. Intra-refresh найбільше виграє саме на завантаженому лінку." },
+  { name: "Під РЕБ: ємність упала до 3.4 Mbps (94 %)", p: { C: 3.4 },
+    note: "Енкодер ще не знизив бітрейт: черга після кожного IDR розсмоктується майже до наступного. Це і є сигнал для ABR-сходинки вниз (слайд 36)." },
+  { name: "Довгий GOP 120 (запис, пошук)", p: { G: 120, ip: 8, b0: 1.4 },
+    note: "Рідкісні IDR економлять бітрейт, але після втрати картинка «бита» до наступного IDR — понад 2.5 с. PLI рятує оператора; intra-refresh лікує за той самий цикл 120 кадрів (4 с), тобто довше за вікно графіка." },
+  { name: "Довга серія втрат 400 мс", p: { blen: 400 },
+    note: "Довга серія — типова для глушіння. IDR на вимогу знову дає пік; intra-refresh починає лікування лише після кінця серії." },
+];
+let P = { ...BASE };
+
+// ───────────────────────── модель
+function noise(i) { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return 1 + 0.14 * (x - Math.floor(x) - 0.5); }
+
+// variant: "gop" | "pli" | "ir"; loss: чи вмикати серію втрат
+function simulate(p, variant, loss) {
+  const T = 1 / p.fps, n = Math.round(DUR * p.fps), C = p.C * 1e6;
+  const Savg = p.R * 1e6 * T, SP = Savg / (1 + (p.ip - 1) / p.G), SI = p.ip * SP;
+  const b0 = p.b0, b1 = p.b0 + p.blen / 1000, burst = loss && p.burst && p.blen > 0;
+  const quiet = Math.max(0.03, 1.5 * T), half = p.rtt / 2000;
+  const fr = [], losses = [];
+  let free = 0, k = 0, dirty = false, resume = null, lastForced = -1;
+  for (let i = 0; i < n; i++) {
+    const tc = i * T;
+    let type = "P", forced = false;
+    if (variant === "ir") type = "R";
+    else {
+      if (variant === "pli") {
+        for (let j = 0; j < losses.length; j++) {          // таймер PLI: тиша quiet після втрати, далі RTT / 2 до енкодера
+          const L = losses[j], nx = losses[j + 1];
+          if (L.cap < lastForced || (nx && nx.t <= L.t + quiet)) continue;
+          if (L.t + quiet + half <= tc) { forced = true; break; }
+        }
+      }
+      if (forced) { k = 0; lastForced = tc; }
+      if (k % p.G === 0) type = "I";
+      k++;
+    }
+    const size = (type === "I" ? SI : type === "P" ? SP : Savg) * (type === "I" ? 1 : noise(i));
+    const t0 = Math.max(tc, free), t1 = t0 + size / C;
+    free = t1;
+    const lost = burst && t0 < b1 && t1 > b0;
+    const f = { i, tc, t0, t1, type, forced, size, lat: (t1 - tc) * 1000, lost, frac: 0, state: "ok" };
+    if (lost) {
+      f.state = "lost"; dirty = true; resume = null; losses.push({ t: t1, cap: tc });
+    } else if (variant === "ir") {
+      if (dirty) {
+        if (resume === null) resume = i;
+        f.frac = 1 - (i - resume + 1) / p.G;
+        f.resume = resume;
+        if (f.frac <= 1e-9) { dirty = false; f.frac = 0; } else f.state = "dirty";
+      }
+    } else if (type === "I") dirty = false;
+    else if (dirty) { f.state = "dirty"; f.frac = 1; }
+    fr.push(f);
+  }
+  return fr;
+}
+
+function pctl(a, q) { const s = [...a].sort((x, y) => x - y); if (!s.length) return NaN;
+  const pos = (s.length - 1) * q, lo = Math.floor(pos); return s[lo] + (s[Math.min(lo + 1, s.length - 1)] - s[lo]) * (pos - lo); }
+
+function recovery(fr, p) {
+  const b1 = p.b0 + p.blen / 1000;
+  const bad = fr.filter(f => f.state !== "ok");
+  if (!bad.length) return { clean: null, lost: 0, dirty: 0 };
+  const last = bad[bad.length - 1].i, next = fr[last + 1];
+  return { clean: next ? (next.t1 - b1) * 1000 : Infinity, lost: bad.filter(f => f.state === "lost").length,
+           dirty: bad.filter(f => f.state === "dirty").length };
+}
+
+const VAR = [{ key: "gop", name: "GOP, чекаємо IDR", c: "red", what: "IDR кожні GOP кадрів" },
+             { key: "pli", name: "GOP + PLI", c: "amber", what: "плюс IDR на запит приймача" },
+             { key: "ir", name: "intra-refresh", c: "teal", what: "смуга intra-блоків, без I-кадрів" }];
+const S = { runs: {}, base: {}, hover: null, pin: null };
+
+function recompute() {
+  for (const v of VAR) { S.runs[v.key] = simulate(P, v.key, true); S.base[v.key] = simulate(P, v.key, false); }
+  renderCards(); renderFormula(); schedule();
+}
+
+// ───────────────────────── кольори й canvas
+let COL = {};
+function readColors() { const cs = getComputedStyle(document.documentElement);
+  for (const k of ["text", "muted", "line", "grid", "blue", "teal", "amber", "red", "violet", "panel", "stage", "mono", "sans"]) COL[k] = cs.getPropertyValue("--" + k).trim(); }
+function alpha(hex, a) { const p = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); return `rgba(${p[0]},${p[1]},${p[2]},${a})`; }
+function fit(canvas, cssH) {
+  if (cssH) canvas.style.height = cssH + "px";
+  const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== Math.round(r.width * dpr) || canvas.height !== Math.round(r.height * dpr)) {
+    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr); }
+  const ctx = canvas.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w: r.width, h: r.height };
+}
+function niceStep(range, n) { const raw = range / n, m = Math.pow(10, Math.floor(Math.log10(raw)));
+  return [1, 2, 2.5, 5, 10].map(k => k * m).find(s => s >= raw); }
+
+// ───────────────────────── великий графік
+const LAY = { left: 70, right: 16, top: 10, hSize: 120, gap: 30, hLat: 150, lane: 20, laneGap: 6 };
+function layout(w) {
+  const L = { ...LAY, w, pw: w - LAY.left - LAY.right };
+  L.ySize = L.top + 16; L.yLat = L.ySize + L.hSize + L.gap; L.yLanes = L.yLat + L.hLat + L.gap;
+  L.height = L.yLanes + 3 * (L.lane + L.laneGap) + 22;
+  L.x = t => L.left + (t / DUR) * L.pw;
+  return L;
+}
+
+function drawPlot() {
+  const cv = $("plot"), L = layout(cv.getBoundingClientRect().width);
+  const { ctx } = fit(cv, L.height); S.L = L;
+  ctx.clearRect(0, 0, L.w, L.height);
+  ctx.font = `12px ${COL.sans}`; ctx.textBaseline = "middle";
+  const gop = S.runs.gop, pli = S.runs.pli, ir = S.runs.ir, T = 1 / P.fps, bw = Math.max(1, (L.pw / (DUR * P.fps)) * 0.45);
+  const b1 = P.b0 + P.blen / 1000;
+
+  // серія втрат на всіх панелях
+  if (P.burst && P.blen > 0) { ctx.fillStyle = alpha(COL.red, 0.13);
+    ctx.fillRect(L.x(P.b0), L.ySize - 4, L.x(b1) - L.x(P.b0), L.height - L.ySize - 18); }
+
+  // 1. розмір кадру
+  const maxKB = Math.max(...gop.map(f => f.size), ...pli.map(f => f.size), ...ir.map(f => f.size)) / 8000 * 1.1;
+  const yS = v => L.ySize + L.hSize - (v / maxKB) * L.hSize;
+  axis(ctx, L, L.ySize, L.hSize, maxKB, yS, "розмір, КБ");
+  for (let i = 0; i < gop.length; i++) {
+    const x = L.x(i * T);
+    ctx.fillStyle = COL.red; ctx.fillRect(x - bw, yS(gop[i].size / 8000), bw, L.ySize + L.hSize - yS(gop[i].size / 8000));
+    ctx.fillStyle = COL.teal; ctx.fillRect(x, yS(ir[i].size / 8000), bw, L.ySize + L.hSize - yS(ir[i].size / 8000));
+    if (pli[i].forced) { ctx.fillStyle = COL.amber; ctx.fillRect(x - bw, yS(pli[i].size / 8000), bw, L.ySize + L.hSize - yS(pli[i].size / 8000)); }
+  }
+
+  // 2. затримка кадру
+  const maxLat = Math.max(60, ...gop.map(f => f.lat), ...pli.map(f => f.lat), ...ir.map(f => f.lat)) * 1.1;
+  const yL = v => L.yLat + L.hLat - (v / maxLat) * L.hLat;
+  axis(ctx, L, L.yLat, L.hLat, maxLat, yL, "затримка, мс");
+  for (const [run, c, dash] of [[gop, COL.red, []], [pli, COL.amber, [5, 4]], [ir, COL.teal, []]]) {
+    ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.setLineDash(dash); ctx.beginPath(); let pen = false;
+    for (const f of run) { if (f.lost) { pen = false; continue; }
+      const x = L.x(f.tc), y = yL(f.lat); pen ? ctx.lineTo(x, y) : ctx.moveTo(x, y); pen = true; }
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // 3. стан картинки
+  VAR.forEach((v, r) => {
+    const y = L.yLanes + r * (L.lane + L.laneGap), run = S.runs[v.key];
+    ctx.fillStyle = COL.muted; ctx.textAlign = "right"; ctx.font = `12px ${COL.mono}`;
+    ctx.fillText(["GOP", "PLI", "IR"][r], L.left - 8, y + L.lane / 2);
+    ctx.fillStyle = COL.grid; ctx.fillRect(L.left, y, L.pw, L.lane);
+    for (const f of run) {
+      if (f.state === "ok") continue;
+      ctx.fillStyle = f.state === "lost" ? COL.red : alpha(COL.amber, 0.25 + 0.75 * f.frac);
+      ctx.fillRect(L.x(f.tc), y, Math.max(1, L.x(T) - L.x(0)), L.lane);
+    }
+    for (const f of run) if (f.type === "I") { ctx.fillStyle = COL[v.c]; ctx.fillRect(L.x(f.tc), y, 2, L.lane); }
+  });
+
+  // вісь часу
+  ctx.fillStyle = COL.muted; ctx.font = `12px ${COL.sans}`; ctx.textAlign = "center"; ctx.textBaseline = "top";
+  const yAx = L.yLanes + 3 * (L.lane + L.laneGap) + 2;
+  for (let t = 0; t <= DUR + 1e-9; t += 0.5) { ctx.textAlign = t > DUR - 1e-9 ? "right" : "center"; ctx.fillText(t.toFixed(1), L.x(t), yAx); }
+  ctx.textAlign = "right"; ctx.fillText("час, с", L.left - 18, yAx);
+
+  // курсор
+  const t = S.pin ?? S.hover;
+  if (t != null) { ctx.strokeStyle = COL.text; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(L.x(t), L.ySize - 4); ctx.lineTo(L.x(t), yAx - 2); ctx.stroke(); ctx.setLineDash([]); }
+}
+
+function axis(ctx, L, y0, h, vmax, ymap, title) {
+  const st = niceStep(vmax, 4);
+  ctx.font = `11.5px ${COL.mono}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (let v = 0; v <= vmax + 1e-9; v += st) {
+    const y = ymap(v); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(L.left, y); ctx.lineTo(L.left + L.pw, y); ctx.stroke();
+    ctx.fillStyle = COL.muted; ctx.fillText(+v.toFixed(1), L.left - 8, y);
+  }
+  ctx.textAlign = "left"; ctx.font = `600 12px ${COL.sans}`; ctx.fillStyle = COL.text; ctx.fillText(title, L.left + 4, y0 - 6);
+}
+
+// ───────────────────────── кадр очима оператора
+function frameAt(run, t) {
+  // останній кадр, що дійшов до моменту t (декодер показує його, поки не прийде новий)
+  let shown = null;
+  for (const f of run) { if (f.t1 > t) break; if (!f.lost) shown = f; }
+  return shown;
+}
+function drawFrame(id, capId, run, v) {
+  const cv = $(id), { ctx, w, h } = fit(cv), t = S.pin ?? S.hover ?? (P.b0 + P.blen / 1000 + 0.25);
+  ctx.fillStyle = COL.stage; ctx.fillRect(0, 0, w, h);
+  const nx = 16, ny = 9, cw = w / nx, ch = h / ny;
+  for (let gx = 0; gx < nx; gx++) for (let gy = 0; gy < ny; gy++) {        // «сцена»: блоки зі спокійною текстурою
+    const s = Math.sin(gx * 1.7 + gy * 2.3) * 0.5 + 0.5;
+    ctx.fillStyle = alpha(COL.muted, 0.10 + 0.18 * s); ctx.fillRect(gx * cw + 1, gy * ch + 1, cw - 2, ch - 2);
+  }
+  const f = frameAt(run, t);
+  let cap = "";
+  if (!f) { cap = "ще нічого не прийшло"; }
+  else {
+    const age = Math.round((t - f.tc) * 1000);
+    if (f.state === "dirty") {
+      if (v === "ir") {                                                  // уже оброблена смугою частина — чиста
+        const N = P.G, swept = (f.i - f.resume + 1) / N, x0 = ((f.resume % N) / N) * w;
+        ctx.fillStyle = alpha(COL.amber, 0.55); ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = COL.stage;
+        const x1 = x0 + swept * w;
+        for (const [a, b] of x1 <= w ? [[x0, x1]] : [[x0, w], [0, x1 - w]]) {
+          ctx.clearRect(a, 0, b - a, h); ctx.fillStyle = COL.stage; ctx.fillRect(a, 0, b - a, h);
+          for (let gx = 0; gx < nx; gx++) for (let gy = 0; gy < ny; gy++) {
+            const cx = gx * cw; if (cx + cw <= a || cx >= b) continue;
+            const s = Math.sin(gx * 1.7 + gy * 2.3) * 0.5 + 0.5;
+            ctx.fillStyle = alpha(COL.muted, 0.10 + 0.18 * s);
+            ctx.fillRect(Math.max(cx + 1, a), gy * ch + 1, Math.min(cx + cw - 1, b) - Math.max(cx + 1, a), ch - 2);
+          }
+        }
+        cap = `кадр ${f.i} · уражено ${Math.round(f.frac * 100)} % площі; смуга лікує картинку`;
+      } else {
+        for (let gx = 0; gx < nx; gx++) for (let gy = 0; gy < ny; gy++)
+          if ((gx * 7 + gy * 13) % 5 < 3) { ctx.fillStyle = alpha(COL.amber, 0.65); ctx.fillRect(gx * cw + 1, gy * ch + 1, cw - 2, ch - 2); }
+        cap = `кадр ${f.i} · артефакти тягнуться від втраченого опорного кадру до IDR`;
+      }
+    } else cap = `кадр ${f.i} · чиста картинка`;
+    if (v === "ir") {                                                    // поточне положення смуги intra-refresh
+      const N = P.G, bx = ((f.i % N) / N) * w;
+      ctx.fillStyle = alpha(COL.teal, 0.55); ctx.fillRect(bx, 0, Math.max(2, w / N), h);
+    }
+    if (f.type === "I") { ctx.strokeStyle = COL[VAR.find(x => x.key === v).c]; ctx.lineWidth = 3; ctx.strokeRect(1.5, 1.5, w - 3, h - 3); cap += " · I-кадр"; }
+    if (run.some(x => x.lost && x.i > f.i && x.tc <= t)) {         // новіші кадри загубились — декодер тримає старий
+      ctx.fillStyle = alpha(COL.red, 0.18); ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = COL.red; ctx.font = `600 13px ${COL.mono}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("застиглий кадр", w / 2, h / 2);
+      cap += " · нові кадри не доходять";
+    }
+    cap += ` · вік на екрані ${age} мс`;
+  }
+  ctx.fillStyle = COL.text; ctx.font = `600 12px ${COL.mono}`; ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.fillText(`t = ${t.toFixed(2)} с`, 6, 5);
+  $(capId).textContent = cap;
+}
+
+// ───────────────────────── картки і формула
+function fmtMs(v) { return v == null ? "—" : !isFinite(v) ? "> " + DUR + " с" : Math.round(v) + " мс"; }
+function renderCards() {
+  $("cards").innerHTML = VAR.map(v => {
+    const b = S.base[v.key].map(f => f.lat), r = recovery(S.runs[v.key], P);
+    const hasBurst = P.burst && P.blen > 0;
+    return `<div class="card" style="--c: var(--${v.c})">
+      <div class="top"><h2>${v.name}</h2><span class="what">${v.what}</span></div>
+      <div class="row"><span class="l">затримка без втрат p50 / p99</span><span class="v">${Math.round(pctl(b, 0.5))} <small>/</small> ${Math.round(pctl(b, 0.99))} <small>мс</small></span></div>
+      <div class="row"><span class="l">найбільший кадр</span><span class="v">${(Math.max(...S.runs[v.key].map(f => f.size)) / 8000).toFixed(1)} <small>КБ</small></span></div>
+      <div class="row"><span class="l">чиста картинка після серії</span><span class="v">${hasBurst ? (r.clean == null ? "без наслідків" : "через " + fmtMs(r.clean)) : "—"}</span></div>
+      <div class="row"><span class="l">застиглих / битих кадрів</span><span class="v">${hasBurst ? r.lost + " <small>/</small> " + r.dirty : "—"}</span></div>
+    </div>`; }).join("");
+}
+function renderFormula() {
+  const T = 1 / P.fps, Savg = P.R * 1e3 * T, SP = Savg / (1 + (P.ip - 1) / P.G), SI = P.ip * SP;
+  const rP = SP * P.fps / 1e3, drain = P.C > rP ? (SI - SP) / (P.C - rP) : Infinity;
+  const util = P.R / P.C;
+  let s = `<span class="n">// середній кадр і розподіл бітрейту між I та P</span>
+<span class="f">S̄ = R / fps</span> = ${P.R.toFixed(1)} Мбіт/с / ${P.fps} = ${Savg.toFixed(0)} кбіт
+<span class="f">S_P = S̄ / (1 + (I/P − 1) / GOP)</span> = ${Savg.toFixed(0)} / (1 + ${(P.ip - 1).toFixed(1)} / ${P.G}) = ${SP.toFixed(0)} кбіт,   <span class="f">S_I</span> = ${P.ip} · S_P = ${SI.toFixed(0)} кбіт
+<span class="n">// пік затримки від IDR і скільки черга розсмоктується</span>
+<span class="f">пік ≈ S_I / C</span> = ${SI.toFixed(0)} кбіт / ${P.C.toFixed(1)} Мбіт/с = ${(SI / P.C).toFixed(0)} мс        <span class="n">(${(SI / P.C * P.fps / 1000).toFixed(1)} кадрових періодів)</span>
+<span class="f">розсмоктування ≈ (S_I − S_P) / (C − S_P·fps)</span> = ${(SI - SP).toFixed(0)} / (${P.C.toFixed(1)} − ${rP.toFixed(2)}) = ${isFinite(drain) ? drain.toFixed(0) + " мс" : '<span class="warn">черга не розсмоктується</span>'}
+<span class="f">intra-refresh ≈ S̄ / C</span> = ${Savg.toFixed(0)} / ${P.C.toFixed(1)} = ${(Savg / P.C).toFixed(0)} мс,   лінк завантажено на ${(util * 100).toFixed(0)} %`;
+  if (util >= 1) s += `\n<span class="warn">R ≥ C: черга росте без меж за будь-якого енкодера — потрібна нижча сходинка бітрейту.</span>`;
+  $("formula").innerHTML = s;
+}
+
+// ───────────────────────── підказка і перемальовування
+let raf = 0;
+function schedule() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawPlot();
+  drawFrame("fGop", "cGop", S.runs.gop, "gop"); drawFrame("fPli", "cPli", S.runs.pli, "pli"); drawFrame("fIr", "cIr", S.runs.ir, "ir"); }); }
+
+function timeAt(e) { const L = S.L, r = $("plot").getBoundingClientRect(), x = e.clientX - r.left;
+  if (!L || x < L.left || x > L.left + L.pw) return null; return { t: ((x - L.left) / L.pw) * DUR, x, y: e.clientY - r.top }; }
+function tipText(t) {
+  const i = Math.min(Math.floor(t * P.fps + 1e-9), S.runs.gop.length - 1), st = { ok: "ок", lost: "не дійшов", dirty: "артефакти" };
+  let s = `кадр ${i} · захоплено ${(i / P.fps).toFixed(3)} с`;
+  for (const v of VAR) { const f = S.runs[v.key][i];
+    s += `\n${v.name.padEnd(17)} ${f.type === "R" ? "P" : f.type}${f.forced ? "*" : " "} ${(f.size / 8000).toFixed(1).padStart(5)} КБ ${f.lost ? "    —   " : (Math.round(f.lat) + " мс").padStart(8)}  ${st[f.state]}`; }
+  return s + "\n* — IDR на вимогу (PLI)";
+}
+const plot = $("plot");
+plot.addEventListener("pointermove", e => {
+  const h = timeAt(e), tip = $("tip");
+  if (!h) { tip.style.display = "none"; return; }
+  S.hover = h.t; schedule();
+  tip.textContent = tipText(h.t); tip.style.display = "block";
+  const r = plot.getBoundingClientRect(), sh = plot.parentElement.clientHeight, th = tip.offsetHeight;
+  tip.style.left = Math.max(6, Math.min(h.x + 14, r.width - tip.offsetWidth - 6)) + "px";
+  tip.style.top = (h.y + 16 + th > sh ? Math.max(4, h.y - th - 10) : h.y + 16) + "px";
+});
+plot.addEventListener("pointerleave", () => { S.hover = null; $("tip").style.display = "none"; schedule(); });
+plot.addEventListener("click", e => { const h = timeAt(e); S.pin = h && S.pin == null ? h.t : null; schedule(); });
+
+// ───────────────────────── елементи керування
+function buildControls() {
+  const box = $("controls");
+  box.innerHTML = CTL.map(c => `<label class="ctl"><span class="k">${c.label}<b id="v_${c.key}"></b></span>
+    <input type="range" id="r_${c.key}" min="${c.min}" max="${c.max}" step="${c.step}"></label>`).join("")
+    + `<label class="ctl check"><input type="checkbox" id="burst"> серія втрат (глушіння)</label>`;
+  for (const c of CTL) $("r_" + c.key).addEventListener("input", e => { P[c.key] = +e.target.value; syncControls(); recompute(); });
+  $("burst").addEventListener("change", e => { P.burst = e.target.checked; syncControls(); recompute(); });
+}
+function syncControls() {
+  for (const c of CTL) { $("r_" + c.key).value = P[c.key]; $("v_" + c.key).textContent = c.fmt(P[c.key]);
+    if (["b0", "blen", "rtt"].includes(c.key)) $("r_" + c.key).disabled = !P.burst; }
+  $("burst").checked = P.burst;
+}
+function applyPreset(k) { P = { ...BASE, ...PRESETS[k].p }; S.pin = null; $("preset").value = k;
+  $("presetNote").textContent = PRESETS[k].note; syncControls(); recompute(); }
+$("preset").innerHTML = PRESETS.map((p, k) => `<option value="${k}">${p.name}</option>`).join("");
+$("preset").addEventListener("change", e => applyPreset(+e.target.value));
+
+new ResizeObserver(schedule).observe(document.body);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); schedule(); });
+document.fonts && document.fonts.ready.then(schedule);
+readColors(); buildControls();
+applyPreset(0);
+</script>
+</body>
+</html>

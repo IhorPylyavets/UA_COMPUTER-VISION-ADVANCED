@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Транспорт під лінк</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F2F3F4; --panel: #FFFFFF; --line: #D6D9DC; --text: #16181A; --muted: #5C636B;
+  --blue: #1F6FD6; --teal: #0E9C8A; --amber: #C47A00; --red: #D63A3A; --violet: #6D4BD8; --grid: #E4E6E8; --stage: #FAFAFB;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "DejaVu Sans Mono", monospace;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #181919; --panel: #202121; --line: #333434; --text: #E8EAED; --muted: #9AA0A6;
+    --blue: #4A9EFF; --teal: #2DD4BF; --amber: #F59E0B; --red: #EF4444; --violet: #A78BFA; --grid: #262828; --stage: #141515;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #181919; --panel: #202121; --line: #333434; --text: #E8EAED; --muted: #9AA0A6;
+  --blue: #4A9EFF; --teal: #2DD4BF; --amber: #F59E0B; --red: #EF4444; --violet: #A78BFA; --grid: #262828; --stage: #141515;
+}
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 var(--sans); }
+
+.app { display: flex; flex-direction: column; gap: 14px; padding: 18px 16px 24px; max-width: 1240px; margin: 0 auto; }
+h1 { font: 600 26px/1.15 var(--mono); margin: 0; letter-spacing: -0.01em; }
+.lede { color: var(--muted); margin: 4px 0 0; max-width: 85ch; }
+
+select { font: 500 14px var(--sans); color: var(--text); background: var(--panel);
+         border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+select:hover { border-color: var(--muted); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.scenario { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.scenario select { flex: 0 1 380px; min-width: 0; font-weight: 600; }
+.scenario p { flex: 1 1 360px; margin: 0; font-size: 14px; color: var(--muted); }
+
+.controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px 18px;
+            background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.controls h3 { grid-column: 1 / -1; margin: 2px 0 -4px; font: 600 12px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.ctl { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ctl .k { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+.ctl .k b { font: 600 13px var(--mono); color: var(--text); }
+.ctl input[type="range"] { width: 100%; accent-color: var(--teal); }
+.ctl select { padding: 4px 8px; font-size: 13px; }
+
+.plots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.stage { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.stage h2 { font: 600 14px var(--mono); margin: 10px 14px 0; }
+.stage canvas { display: block; width: 100%; height: 260px; touch-action: none; cursor: crosshair; }
+.lensnote { border-top: 1px solid var(--line); padding: 8px 14px 10px; font-size: 13.5px; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+       padding: 6px 9px; font: 12.5px/1.55 var(--mono); display: none; white-space: pre; box-shadow: 0 4px 16px rgba(0,0,0,.18); z-index: 2; }
+
+.cmp { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; overflow-x: auto; }
+.cmp h2 { font: 600 14px var(--mono); margin: 0 0 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 760px; }
+th { text-align: left; font: 600 12px var(--mono); color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+td.name { font: 600 13.5px var(--mono); color: var(--c); white-space: nowrap; }
+td.num { font: 600 14px var(--mono); white-space: nowrap; }
+td .sub { display: block; font: 12px var(--sans); color: var(--muted); font-weight: 400; }
+.bar { position: relative; height: 10px; border-radius: 5px; background: var(--grid); min-width: 120px; }
+.bar span { position: absolute; top: 0; height: 100%; border-radius: 5px; }
+.note { color: var(--muted); font-size: 12.5px; }
+.formula { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+           font: 13px/1.7 var(--mono); white-space: pre-wrap; overflow-x: auto; }
+.formula .f { color: var(--text); font-weight: 600; }
+.formula .n { color: var(--muted); }
+footer { color: var(--muted); font-size: 12.5px; }
+
+@media (max-width: 860px) { .plots { grid-template-columns: 1fr; } h1 { font-size: 21px; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Транспорт під лінк: jitter buffer, FEC, NACK і SRT</h1>
+    <p class="lede">Той самий лінк — чотири способи платити за втрати й джиттер: пізніше (буфер), ширше (FEC), на RTT (повтор) або
+      всім потоком наперед (SRT). Веб-демо 04 до слайдів 31 і 32; LIVE DEMO 3 (слайд 33) міряє RTP і SRT на справжньому GStreamer.</p>
+  </header>
+
+  <div class="scenario">
+    <select id="preset" aria-label="Сценарій"></select>
+    <p id="presetNote"></p>
+  </div>
+
+  <section class="controls" id="controls" aria-label="Параметри"></section>
+
+  <section class="plots">
+    <div class="stage">
+      <h2>Jitter buffer: пізні кадри = втрачені</h2>
+      <canvas id="jb" aria-label="Частка кадрів, що запізнились, залежно від розміру jitter buffer, логарифмічна шкала"></canvas>
+      <div class="lensnote" id="jbNote" aria-live="polite"></div>
+      <div class="tip" id="tipJb"></div>
+    </div>
+    <div class="stage">
+      <h2>SRT: скільки спроб ARQ вміщує latency</h2>
+      <canvas id="srt" aria-label="Залишкові втрати пакетів після ARQ залежно від множника latency / RTT, логарифмічна шкала"></canvas>
+      <div class="lensnote" id="srtNote" aria-live="polite"></div>
+      <div class="tip" id="tipSrt"></div>
+    </div>
+  </section>
+
+  <section class="cmp" aria-live="polite">
+    <h2>Той самий лінк, різний транспорт</h2>
+    <table>
+      <thead><tr><th>транспорт</th><th>затримка p50 / p99</th><th></th><th>кадр дійшов цілим</th><th>чистих до IDR (песимістично)</th><th>де в UAV-системі</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="note">Затримка — лише транспортна частина: RTT / 2 + джиттер + те, що додає механізм. Сенсор, енкодер, декодер і дисплей
+      зверху (слайд 8). Смуга: суцільна — p50, світла — до p99.</p>
+  </section>
+
+  <section class="formula" id="formula" aria-live="polite"></section>
+
+  <footer>Модель, не бенчмарк. Джиттер — Gamma(k = 2) із заданим σ; пакети одного кадру йдуть разом, тому запізнюється
+    кадр цілком. Втрати незалежні: серії втрат під глушінням гірші для FEC і ARQ. SRT: одна спроба повтору на кожен RTT у межах
+    latency (слайд 32). WebRTC: один NACK/RTX за RTT, адаптивний jitter buffer, PLI після невідновленої втрати; GCC, що знижує бітрейт, не
+    моделюється. «Чистих до IDR» — верхня оцінка шкоди: кожна втрата псує всі кадри до наступного IDR. На сцені з повільним рухом,
+    як у LIVE DEMO 3, артефакти менш помітні, тож справжня частка лежить між двома стовпцями.</footer>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const PKT = 1200 * 8;                               // біт корисного навантаження в пакеті
+
+// ───────────────────────── параметри і сценарії
+const CTL = [
+  { group: "лінк" },
+  { key: "rtt", label: "RTT", min: 5, max: 800, step: 5, fmt: v => v + " мс" },
+  { key: "sigma", label: "джиттер σ", min: 1, max: 60, step: 1, fmt: v => v + " мс" },
+  { key: "loss", label: "втрати пакетів", min: 0, max: 20, step: 0.1, fmt: v => v.toFixed(1) + " %" },
+  { key: "R", label: "бітрейт відео", min: 0.3, max: 8, step: 0.1, fmt: v => v.toFixed(1) + " Mbps" },
+  { key: "G", label: "GOP", min: 10, max: 120, step: 5, fmt: v => v + " кадрів" },
+  { group: "налаштування транспорту" },
+  { key: "jb", label: "jitter buffer RTP", min: 0, max: 300, step: 5, fmt: v => v + " мс" },
+  { key: "m", label: "SRT latency / RTT", min: 0.5, max: 8, step: 0.5, fmt: v => "× " + v.toFixed(1) },
+  { key: "fec", label: "FEC k / n", options: ["4/6", "8/10", "8/12", "16/20", "16/24"] },
+];
+const FPS = 30;
+const BASE = { rtt: 80, sigma: 10, loss: 2, R: 1.5, G: 30, jb: 80, m: 3, fec: "8/12" };
+const PRESETS = [
+  { name: "LIVE DEMO 3: LTE, RTT 80 мс, 2 % втрат", p: {},
+    note: "Лінк із ноутбука (сценарій B, слайд 8). RTP без відновлення псує більшість кадрів; SRT з 3 × RTT повертає майже все, але платить ≈ 280 мс; WebRTC платить RTT лише за ті кадри, де була втрата." },
+  { name: "LOS-радіо до GCS (сценарій A)", p: { rtt: 10, sigma: 3, loss: 0.5, R: 2.2, jb: 20 },
+    note: "Короткий RTT і малий джиттер: усе дешево. Навіть SRT тут коштує лише десятки мілісекунд — але на радіо його не ставлять: broadcast і серії втрат (слайд 31)." },
+  { name: "Радіо під РЕБ: 10 % втрат", p: { rtt: 15, sigma: 5, loss: 10, R: 1.2, jb: 30 },
+    note: "Без відновлення картинки немає. FEC 8/12 витягує частину, але на 10 % блок частіше ламається: ширший запас (16/24) або менше пакетів на кадр (нижча сходинка ABR)." },
+  { name: "Супутник: RTT 600 мс", p: { rtt: 600, sigma: 20, loss: 1, R: 2, jb: 100 },
+    note: "ARQ стає дорогим: SRT з 3 × RTT — майже дві секунди буфера. Для штабу прийнятно, для гімбала — ні: тут допомагає лише FEC або CV на борту." },
+  { name: "Jitter buffer замалий: 20 мс при σ = 10", p: { loss: 0, jb: 20 },
+    note: "Лінк нічого не губить, але кожен п'ятий кадр приходить пізніше за jitter buffer і викидається. Потягніть повзунок JB до ≈ 6.5 σ — p50 майже не зміниться (буфер чекає лише на дірку)." },
+];
+let P = { ...BASE };
+
+// ───────────────────────── модель
+// джиттер X ~ Gamma(k=2, θ), σ = θ·√2
+const theta = s => s / Math.SQRT2;
+const late = (x, s) => { const z = x / theta(s); return Math.exp(-z) * (1 + z); };           // P(X > x)
+function quant(q, s) { let lo = 0, hi = 50 * s; for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; late(mid, s) > 1 - q ? lo = mid : hi = mid; } return lo; }
+function binomTail(n, p, k) { let s = 0, c = 1; for (let i = 0; i <= n; i++) { if (i >= k) s += c * Math.pow(p, i) * Math.pow(1 - p, n - i); c = c * (n - i) / (i + 1); } return s; }
+// частка кадрів без артефактів, якщо кожна втрата псує всі кадри до наступного IDR (кожні g кадрів)
+const cleanToIdr = (s, g) => (s >= 1 ? 1 : s * (1 - Math.pow(s, g)) / (g * (1 - s)));
+const srtResidual = (p, m) => Math.pow(p, Math.floor(m) + 1);
+
+function evaluate(P) {
+  const p = P.loss / 100, half = P.rtt / 2, kp = Math.max(1, Math.ceil(P.R * 1e6 / FPS / PKT)), tPkt = PKT / (P.R * 1e6) * 1000;
+  const med = quant(0.5, P.sigma), q99 = quant(0.99, P.sigma);
+  const [fk, fn] = P.fec.split("/").map(Number);
+  const anyLoss = 1 - Math.pow(1 - p, kp);                     // у кадрі є хоча б одна втрата
+  const rows = [];
+  const add = (key, name, c, p50, p99, pres, lateF, where, { g = P.G, sub = "" } = {}) => {
+    const s = Math.pow(1 - pres, kp) * (1 - lateF);
+    rows.push({ key, name, c, p50, p99, whole: s, clean: cleanToIdr(s, g), where, sub });
+  };
+  const lateJb = late(P.jb, P.sigma);
+  add("rtp", "RTP/UDP + JB", "red", half + med, half + Math.min(P.jb, q99), p, lateJb,
+      "LOS-лінк борт → GCS, LAN", { sub: `JB ${P.jb} мс, пізніх кадрів ${fmtP(lateJb)}` });
+  const fecRes = p * binomTail(fn - 1, p, fn - fk);
+  const fecWait = fk * tPkt;                                   // FEC k / n: чекаємо до k пакетів блоку
+  add("fec", `RTP + FEC ${P.fec}`, "amber", half + med, half + Math.min(P.jb, q99) + (anyLoss > 0.01 ? fecWait : 0), fecRes, lateJb,
+      "радіо дрон → GCS (WFB-ng)", { sub: `+${Math.round((fn / fk - 1) * 100)} % смуги, блок ${fecWait.toFixed(0)} мс` });
+  const g = Math.min(P.G, Math.ceil((P.rtt + 50) / 1000 * FPS) + 2);  // PLI: IDR за RTT + тиша
+  add("webrtc", "WebRTC (NACK/RTX)", "blue", half + med + (anyLoss > 0.5 ? P.rtt : 0), half + q99 + (anyLoss > 0.01 ? P.rtt : 0),
+      p * p, 0, "GCS → браузер оператора", { g, sub: `NACK у ${fmtP(anyLoss)} кадрів, PLI → IDR за ≈ ${g} кадрів` });
+  const L = P.m * P.rtt, srtRes = srtResidual(p, P.m), lateSrt = late(L, P.sigma);
+  add("srt", `SRT, latency ${Math.round(L)} мс`, "teal", half + L, half + L, srtRes, lateSrt,
+      "backhaul у штаб, хмару", { sub: `${tries(Math.floor(P.m))}, залишок ${fmtP(srtRes)}` });
+  return { rows, kp, tPkt, med, q99, lateJb, anyLoss, fk, fn, fecRes, L, srtRes };
+}
+
+function tries(n) { const w = n % 10 === 1 && n % 100 !== 11 ? "спроба" : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "спроби" : "спроб";
+  return `${n} ${w} повтору`; }
+function fmtP(x) { if (x <= 0) return "0"; if (x < 1e-4) return x.toExponential(0).replace("e", "·10^"); return (x * 100 < 1 ? (x * 100).toFixed(2) : (x * 100).toFixed(1)) + " %"; }
+function fmtPct(x) { const v = x * 100; return (v >= 99.95 ? "≈ 100" : v.toFixed(v < 10 || v >= 99 ? 1 : 0)) + " %"; }
+
+// ───────────────────────── кольори й canvas
+let COL = {};
+function readColors() { const cs = getComputedStyle(document.documentElement);
+  for (const k of ["text", "muted", "line", "grid", "blue", "teal", "amber", "red", "violet", "panel", "mono", "sans"]) COL[k] = cs.getPropertyValue("--" + k).trim(); }
+function alpha(hex, a) { const p = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); return `rgba(${p[0]},${p[1]},${p[2]},${a})`; }
+function fit(canvas, cssH) {
+  if (cssH) canvas.style.height = cssH + "px";
+  const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== Math.round(r.width * dpr) || canvas.height !== Math.round(r.height * dpr)) {
+    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr); }
+  const ctx = canvas.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w: r.width, h: r.height };
+}
+function niceStep(range, n) { const raw = range / n, m = Math.pow(10, Math.floor(Math.log10(raw)));
+  return [1, 2, 2.5, 5, 10].map(k => k * m).find(s => s >= raw); }
+
+// логарифмічна вісь y від 10^lo до 10^0, лінійна x
+function frame(ctx, w, h, xmax, lo, xlabel, ylabel) {
+  const F = { l: 58, r: 14, t: 14, b: 36 }; F.pw = w - F.l - F.r; F.ph = h - F.t - F.b;
+  F.x = v => F.l + (v / xmax) * F.pw; F.y = v => F.t + (Math.log10(Math.max(v, Math.pow(10, lo))) / lo) * F.ph;
+  F.xmax = xmax; F.lo = lo;
+  ctx.font = `11.5px ${COL.mono}`; ctx.textBaseline = "middle"; ctx.textAlign = "right";
+  for (let e = 0; e >= lo; e--) { const y = F.y(Math.pow(10, e));
+    ctx.strokeStyle = COL.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(F.l, y); ctx.lineTo(F.l + F.pw, y); ctx.stroke();
+    ctx.fillStyle = COL.muted; ctx.fillText(e === 0 ? "1" : "1e" + e, F.l - 6, y); }
+  const st = niceStep(xmax, 6); ctx.textAlign = "center"; ctx.textBaseline = "top";
+  for (let v = 0; v <= xmax + 1e-9; v += st) { const x = F.x(v);
+    ctx.strokeStyle = COL.grid; ctx.beginPath(); ctx.moveTo(x, F.t); ctx.lineTo(x, F.t + F.ph); ctx.stroke();
+    ctx.fillStyle = COL.muted; ctx.fillText(+v.toFixed(1), x, F.t + F.ph + 5); }
+  ctx.fillText(xlabel, F.l + F.pw / 2, F.t + F.ph + 20);
+  ctx.save(); ctx.translate(13, F.t + F.ph / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = "middle"; ctx.fillText(ylabel, 0, 0); ctx.restore();
+  return F;
+}
+// крива на лог-шкалі: обриваємо на нижній межі, а не тягнемо по ній
+function curve(ctx, F, n, fx, c, wdt) {
+  ctx.strokeStyle = c; ctx.lineWidth = wdt; ctx.beginPath();
+  for (let i = 0; i <= n; i++) { const x = (i / n) * F.xmax, v = fx(x), y = F.y(v);
+    i ? ctx.lineTo(F.x(x), y) : ctx.moveTo(F.x(x), y); if (v < Math.pow(10, F.lo)) break; }
+  ctx.stroke();
+}
+function dot(ctx, x, y, c, label, above) {
+  ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, 5, 0, 2 * Math.PI); ctx.fill();
+  ctx.font = `600 12px ${COL.mono}`; ctx.textAlign = "left"; ctx.textBaseline = above ? "bottom" : "top"; ctx.fillText(label, x + 7, above ? y - 4 : y + 4);
+}
+
+// ───────────────────────── графік 1: jitter buffer
+const TARGET = 1e-3;
+function drawJb() {
+  const cv = $("jb"), { ctx, w, h } = fit(cv); ctx.clearRect(0, 0, w, h);
+  const xmax = Math.max(100, Math.ceil(Math.max(P.jb, quant(1 - 1e-5, P.sigma)) * 1.15 / 25) * 25);
+  const F = frame(ctx, w, h, xmax, -5, "розмір jitter buffer, мс", "частка пізніх кадрів"); S.Fjb = F;
+  ctx.strokeStyle = alpha(COL.muted, 0.8); ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(F.l, F.y(TARGET)); ctx.lineTo(F.l + F.pw, F.y(TARGET)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = COL.muted; ctx.font = `11.5px ${COL.sans}`; ctx.textAlign = "right"; ctx.textBaseline = "bottom"; ctx.fillText("ціль: 0.1 % пізніх", F.l + F.pw - 4, F.y(TARGET) - 2);
+  for (const [s, c, wdt] of [[P.sigma / 2, alpha(COL.muted, 0.5), 1.2], [P.sigma * 2, alpha(COL.muted, 0.5), 1.2], [P.sigma, COL.red, 2.5]])
+    curve(ctx, F, 300, x => late(x, s), c, wdt);
+  const need = quant(1 - TARGET, P.sigma);
+  dot(ctx, F.x(need), F.y(TARGET), COL.teal, `${need.toFixed(0)} мс`, true);
+  dot(ctx, F.x(P.jb), F.y(late(P.jb, P.sigma)), COL.red, `JB ${P.jb} мс`, false);
+  $("jbNote").innerHTML = `σ = ${P.sigma} мс (сірі — σ / 2 і 2σ): для 0.1 % пізніх треба <b>${need.toFixed(0)} мс ≈ ${(need / P.sigma).toFixed(1)} σ</b>. ` +
+    `JB ${P.jb} мс → пізніх ${fmtP(late(P.jb, P.sigma))}` + (late(P.jb, P.sigma) > 0.01 ? " — кадри викидаються, хоча лінк їх не губив." : ".");
+}
+
+// ───────────────────────── графік 2: SRT
+function drawSrt() {
+  const cv = $("srt"), { ctx, w, h } = fit(cv); ctx.clearRect(0, 0, w, h);
+  const F = frame(ctx, w, h, 8, -9, "SRT latency / RTT", "залишкові втрати після ARQ"); S.Fsrt = F;
+  ctx.strokeStyle = alpha(COL.muted, 0.8); ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(F.x(3), F.t); ctx.lineTo(F.x(3), F.t + F.ph); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = COL.muted; ctx.font = `11.5px ${COL.sans}`; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText("мінімум Haivision: 3 × RTT", F.x(3) + 4, F.t + 2);
+  const curves = [[0.01, alpha(COL.muted, 0.5), 1.2], [0.05, alpha(COL.muted, 0.5), 1.2], [0.2, alpha(COL.muted, 0.5), 1.2], [P.loss / 100, COL.teal, 2.5]];
+  for (const [p, c, wdt] of curves) if (p > 0) curve(ctx, F, 800, m => srtResidual(p, m), c, wdt);
+  const p = P.loss / 100;
+  if (p > 0) dot(ctx, F.x(P.m), F.y(srtResidual(p, P.m)), COL.teal, `× ${P.m} → ${fmtP(srtResidual(p, P.m))}`, true);
+  const L = P.m * P.rtt;
+  $("srtNote").innerHTML = `latency = ${P.m} × ${P.rtt} мс = <b>${Math.round(L)} мс</b>, сталих для кожного пакета (TSBPD). ` +
+    (p > 0 ? `Втрати ${P.loss.toFixed(1)} % (сірі — 1, 5 і 20 %): ${tries(Math.floor(P.m))}, залишок ${fmtP(srtResidual(p, P.m))}.` : "Без втрат ARQ не потрібен — буфер оплачується даремно.") +
+    (late(L, P.sigma) > 1e-3 ? ` Latency менша за джиттер: пізніх ${fmtP(late(L, P.sigma))}.` : "");
+}
+
+// ───────────────────────── таблиця і формули
+const S = {};
+function renderRows() {
+  const E = evaluate(P); S.E = E;
+  const vmax = Math.max(...E.rows.map(r => r.p99)) * 1.05;
+  $("rows").innerHTML = E.rows.map(r => `<tr>
+    <td class="name" style="--c: var(--${r.c})">${r.name}<span class="sub">${r.sub}</span></td>
+    <td class="num">${Math.round(r.p50)} / ${Math.round(r.p99)} мс</td>
+    <td><div class="bar"><span style="left:0;width:${(r.p99 / vmax) * 100}%;background:var(--${r.c});opacity:.35"></span>
+      <span style="left:0;width:${(r.p50 / vmax) * 100}%;background:var(--${r.c})"></span></div></td>
+    <td class="num">${fmtPct(r.whole)}<div class="bar"><span style="left:0;width:${r.whole * 100}%;background:var(--${r.c})"></span></div></td>
+    <td class="num">${fmtPct(r.clean)}<div class="bar"><span style="left:0;width:${r.clean * 100}%;background:var(--${r.c})"></span></div></td>
+    <td>${r.where}</td></tr>`).join("");
+  const p = P.loss / 100;
+  $("formula").innerHTML = `<span class="n">// скільки пакетів у кадрі і як часто в кадрі є втрата</span>
+<span class="f">пакетів на кадр = ⌈R / fps / 1200 Б⌉</span> = ⌈${P.R.toFixed(1)} Мбіт/с / ${FPS} / 9.6 кбіт⌉ = ${E.kp},   <span class="f">P(у кадрі втрата) = 1 − (1 − p)^${E.kp}</span> = ${fmtP(E.anyLoss)}
+<span class="n">// jitter buffer: пізній кадр = втрачений</span>
+<span class="f">P(X > JB) = e^(−JB/θ)·(1 + JB/θ), θ = σ/√2</span> = ${fmtP(E.lateJb)} при JB ${P.jb} мс
+<span class="n">// FEC ${P.fec}: блок відновлюється, якщо втрачено не більше ${E.fn - E.fk} з ${E.fn}</span>
+<span class="f">залишок ≈ p · P(Binom(${E.fn - 1}, p) ≥ ${E.fn - E.fk})</span> = ${fmtP(E.fecRes)},   смуга × ${(E.fn / E.fk).toFixed(2)}
+<span class="n">// SRT (слайд 32): одна спроба повтору на кожен RTT у межах latency</span>
+<span class="f">залишок = p^(⌊latency / RTT⌋ + 1)</span> = ${p > 0 ? `${p.toFixed(3)}^${Math.floor(P.m) + 1} = ${fmtP(E.srtRes)}` : "0"},   затримка = RTT/2 + latency = ${Math.round(P.rtt / 2 + E.L)} мс
+<span class="n">// поширення помилки: кожна втрата псує кадри до IDR (GOP ${P.G})</span>
+<span class="f">чистих = s·(1 − s^G) / (G·(1 − s)), s = P(кадр цілий)</span>`;
+}
+
+// ───────────────────────── підказки
+function hoverJb(e) {
+  const F = S.Fjb, r = $("jb").getBoundingClientRect(), x = e.clientX - r.left, tip = $("tipJb");
+  if (!F || x < F.l || x > F.l + F.pw) { tip.style.display = "none"; return; }
+  const jb = ((x - F.l) / F.pw) * F.xmax;
+  tip.textContent = `JB ${jb.toFixed(0)} мс\nσ / 2  ${fmtP(late(jb, P.sigma / 2))}\nσ      ${fmtP(late(jb, P.sigma))}\n2σ     ${fmtP(late(jb, 2 * P.sigma))}`;
+  place(tip, $("jb"), x, e.clientY - r.top);
+}
+function hoverSrt(e) {
+  const F = S.Fsrt, r = $("srt").getBoundingClientRect(), x = e.clientX - r.left, tip = $("tipSrt");
+  if (!F || x < F.l || x > F.l + F.pw) { tip.style.display = "none"; return; }
+  const m = ((x - F.l) / F.pw) * 8, p = P.loss / 100;
+  tip.textContent = `latency = ${m.toFixed(1)} × RTT = ${Math.round(m * P.rtt)} мс\nспроб повтору ${Math.floor(m)}\n` +
+    [0.01, 0.05, 0.2].concat(p > 0 ? [p] : []).map(q => `втрати ${(q * 100).toFixed(1).padStart(4)} % → ${fmtP(srtResidual(q, m))}`).join("\n");
+  place(tip, $("srt"), x, e.clientY - r.top);
+}
+function place(tip, cv, x, y) {
+  tip.style.display = "block";
+  const r = cv.getBoundingClientRect(), off = cv.offsetTop;
+  tip.style.left = Math.max(6, Math.min(x + 14, r.width - tip.offsetWidth - 6)) + "px";
+  tip.style.top = (off + y + 16 + tip.offsetHeight > off + r.height ? off + Math.max(4, y - tip.offsetHeight - 10) : off + y + 16) + "px";
+}
+$("jb").addEventListener("pointermove", hoverJb);
+$("srt").addEventListener("pointermove", hoverSrt);
+$("jb").addEventListener("pointerleave", () => { $("tipJb").style.display = "none"; });
+$("srt").addEventListener("pointerleave", () => { $("tipSrt").style.display = "none"; });
+
+// ───────────────────────── елементи керування
+let raf = 0;
+function schedule() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawJb(); drawSrt(); }); }
+function recompute() { renderRows(); schedule(); }
+function buildControls() {
+  $("controls").innerHTML = CTL.map(c => c.group ? `<h3>${c.group}</h3>` : c.options
+    ? `<label class="ctl"><span class="k">${c.label}<b id="v_${c.key}"></b></span><select id="r_${c.key}">${c.options.map(o => `<option>${o}</option>`).join("")}</select></label>`
+    : `<label class="ctl"><span class="k">${c.label}<b id="v_${c.key}"></b></span><input type="range" id="r_${c.key}" min="${c.min}" max="${c.max}" step="${c.step}"></label>`).join("");
+  for (const c of CTL) if (!c.group) $("r_" + c.key).addEventListener("input", e => {
+    P[c.key] = c.options ? e.target.value : +e.target.value; syncControls(); recompute(); });
+}
+function syncControls() {
+  for (const c of CTL) if (!c.group) { $("r_" + c.key).value = P[c.key]; $("v_" + c.key).textContent = c.options ? "" : c.fmt(P[c.key]); }
+}
+function applyPreset(k) { P = { ...BASE, ...PRESETS[k].p }; $("preset").value = k;
+  $("presetNote").textContent = PRESETS[k].note; syncControls(); recompute(); }
+$("preset").innerHTML = PRESETS.map((p, k) => `<option value="${k}">${p.name}</option>`).join("");
+$("preset").addEventListener("change", e => applyPreset(+e.target.value));
+
+new ResizeObserver(schedule).observe(document.body);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); schedule(); });
+document.fonts && document.fonts.ready.then(schedule);
+readColors(); buildControls();
+applyPreset(0);
+</script>
+</body>
+</html>
