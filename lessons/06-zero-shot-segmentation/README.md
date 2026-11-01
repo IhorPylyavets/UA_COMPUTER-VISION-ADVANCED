@@ -132,3 +132,5 @@ python tools/fetch_sam_models.py --models sam3           # опційно, gated
 - B. Xiao et al. [Florence-2](https://arxiv.org/abs/2311.06242), CVPR 2024; S. Bai et al. [Qwen2.5-VL](https://arxiv.org/abs/2502.13923), 2025.
 - F. C. Akyon et al. [SAHI: Slicing Aided Hyper Inference](https://arxiv.org/abs/2202.06934), ICIP 2022; Y. Zhang et al. [ByteTrack](https://arxiv.org/abs/2110.06864), ECCV 2022.
 - P. Zhu et al. [VisDrone](https://github.com/VisDrone/VisDrone-Dataset), IEEE TPAMI 2021.
+
+Збірки open-vocabulary детекторів і сегментаторів — у [`docs/resources/foundation-models.md`](../../docs/resources/foundation-models.md).

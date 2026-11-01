@@ -70,3 +70,5 @@ python -c "import numpy, torch, PIL, pycolmap; print('torch', torch.__version__,
 ```
 
 Then follow the README in each project folder. Activate the environment in every new terminal first.
+
+More repositories (SfM, NeRF, 3DGS frameworks): [`docs/resources/3d-reconstruction.md`](../../docs/resources/3d-reconstruction.md).

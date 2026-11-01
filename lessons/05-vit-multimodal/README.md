@@ -95,3 +95,5 @@ python tools/fetch_clip_models.py                           # demo2, demo3: CLIP
 - F. Liu et al. [RemoteCLIP](https://arxiv.org/abs/2306.11029), IEEE TGRS 2024; Z. Wang et al. [SkyScript](https://arxiv.org/abs/2312.12856), AAAI 2024.
 - J. Johnson, M. Douze, H. Jégou. [Billion-scale similarity search with GPUs (FAISS)](https://arxiv.org/abs/1702.08734), 2017.
 - P. Zhu et al. [VisDrone](https://github.com/VisDrone/VisDrone-Dataset), IEEE TPAMI 2021.
+
+Збірки бекбонів і мультимодальних моделей — у [`docs/resources/foundation-models.md`](../../docs/resources/foundation-models.md).
