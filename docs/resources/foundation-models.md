@@ -24,3 +24,13 @@
 ## Інструменти навколо моделей
 
 [roboflow/supervision](https://github.com/roboflow/supervision) — спільні типи детекцій, анотатори, трекери, метрики й SAHI-слайсинг для будь-якої моделі. MIT.
+
+## Датасети та бенчмарки
+
+| Датасет | Що в ньому | Для чого |
+|---|---|---|
+| [COCO](https://cocodataset.org/), [LVIS](https://www.lvisdataset.org/) | 80 класів; 1200+ класів з довгим хвостом на тих самих зображеннях | Базові метрики детекції; LVIS — стандарт для open-vocabulary (rare-класи) |
+| [ODinW](https://github.com/microsoft/GLIP) | 35 детекційних датасетів з різних доменів (описано в репозиторії GLIP) | Наскільки open-vocabulary детектор переноситься на чужий домен |
+| [VisDrone](https://github.com/VisDrone/VisDrone-Dataset) | DET, VID, MOT, SOT з дронів, 10 класів, дрібні об'єкти | Основний аеродатасет курсу (заняття 5–6, 9) |
+| [DOTA](https://captain-whu.github.io/DOTA/) | аеро- та супутникові знімки, повернуті bbox, 18 класів | Орієнтовані bbox; моделі — у [mmrotate](https://github.com/open-mmlab/mmrotate) |
+| [xView](https://xviewdataset.org/) | супутникові знімки 0.3 м, 60 класів, понад 1 млн об'єктів | Дрібні об'єкти й техніка зверху |

@@ -35,3 +35,10 @@
 | [triton-inference-server/server](https://github.com/triton-inference-server/server) | TensorRT, ONNX, PyTorch, OpenVINO в одному сервері; динамічний батчинг, ансамблі | Стандарт для GPU-сервінгу |
 | [bentoml/BentoML](https://github.com/bentoml/BentoML) | пакування моделі в сервіс, адаптивний батчинг, Docker | Apache-2.0 |
 | [Lightning-AI/LitServe](https://github.com/Lightning-AI/LitServe) | легкий сервер поверх FastAPI з батчингом і стрімінгом | Найменше коду до першого API |
+
+## Датасети для експериментів з якістю даних
+
+| Датасет | Що в ньому | Для чого |
+|---|---|---|
+| [cleanlab/label-errors](https://github.com/cleanlab/label-errors) | знайдені помилки розмітки в тестах ImageNet, CIFAR, QuickDraw та ін. | Наочно: скільки «шуму» в еталонних датасетах |
+| [CIFAR-10N / 100N](https://github.com/UCSC-REAL/cifar-10-100n) | CIFAR з реальними помилками людської розмітки | Бенчмарк навчання на шумних мітках і пошуку помилок |

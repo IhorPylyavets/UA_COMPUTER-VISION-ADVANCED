@@ -34,3 +34,11 @@ INT8 з одного стеку не переноситься в інший бе
 | [dusty-nv/jetson-containers](https://github.com/dusty-nv/jetson-containers) | готові контейнери під JetPack: PyTorch, TensorRT, ONNX Runtime, VLM, ROS | Економить дні на збиранні залежностей |
 | [dusty-nv/jetson-inference](https://github.com/dusty-nv/jetson-inference) | класифікація, детекція, сегментація, поза на TensorRT + камера і RTP | Навчальний старт на Jetson |
 | [NVIDIA-AI-IOT/deepstream_python_apps](https://github.com/NVIDIA-AI-IOT/deepstream_python_apps) | приклади DeepStream на Python: декодування, інференс, трекер `nvtracker`, кілька потоків | Апаратний декодер і zero-copy із заняття 10 |
+
+## Бенчмарки продуктивності
+
+| Ресурс | Що міряє | Примітка |
+|---|---|---|
+| [MLPerf Inference](https://github.com/mlcommons/inference) | затримка й пропускна здатність стандартних моделей, зокрема категорія Edge | Еталонна методика: як чесно міряти latency |
+| [MLPerf Tiny](https://github.com/mlcommons/tiny) | мікроконтролери й дуже малі моделі | Нижня межа edge |
+| [Jetson Benchmarks](https://developer.nvidia.com/embedded/jetson-benchmarks) ([скрипти](https://github.com/NVIDIA-AI-IOT/jetson_benchmarks)) | FPS популярних моделей на різних Jetson | Орієнтир перед вибором плати; відтворюй на своїй моделі |

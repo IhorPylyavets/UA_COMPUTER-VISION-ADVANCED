@@ -19,3 +19,10 @@
 | Репозиторій | Що всередині | Примітка |
 |---|---|---|
 | [DLR-RM/BlenderProc](https://github.com/DLR-RM/BlenderProc) | процедурні сцени в Blender: bbox, маски, глибина, нормалі, формат COCO / BOP | Коли потрібна точна розмітка з коробки; GPL-3.0 |
+
+## Як міряти синтетику
+
+| Ресурс | Що дає | Примітка |
+|---|---|---|
+| [GaParmar/clean-fid](https://github.com/GaParmar/clean-fid) | FID і KID без артефактів ресайзу | Числа зіставні між статтями лише з однаковою реалізацією |
+| [VisDrone](https://github.com/VisDrone/VisDrone-Dataset), [DOTA](https://captain-whu.github.io/DOTA/) | реальні аеродатасети як тест | Головна метрика синтетики — приріст mAP / F1 на **реальному** тесті, а не FID |

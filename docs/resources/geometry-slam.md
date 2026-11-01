@@ -32,3 +32,16 @@
 ## Метрики
 
 [MichaelGrupp/evo](https://github.com/MichaelGrupp/evo) — ATE і RPE для форматів KITTI, TUM, EuRoC і ROS bag. GPL-3.0.
+
+## Датасети та бенчмарки
+
+| Датасет | Що в ньому | Для чого |
+|---|---|---|
+| [KITTI Odometry](https://www.cvlibs.net/datasets/kitti/eval_odometry.php) | стерео + LiDAR з авто, 22 послідовності, лідерборд | VO / LiDAR-одометрія, demo заняття 3; CC BY-NC-SA |
+| [EuRoC MAV](https://www.research-collection.ethz.ch/entities/researchdata/bcaf173e-5dac-484b-bc37-faf97a594f1f) | стерео + IMU з дрона в приміщенні, GT з Vicon / лазертрекера | VIO на дроні |
+| [TUM RGB-D](https://cvg.cit.tum.de/data/datasets/rgbd-dataset), [TUM VI](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset) | RGB-D і fisheye-стерео + IMU; метрики ATE / RPE звідси | RGB-D SLAM, VIO |
+| [UZH-FPV Drone Racing](https://fpv.ifi.uzh.ch/) | агресивні FPV-прольоти: камери, IMU, точний GT | VIO на швидкому маневрі |
+| [Hilti SLAM Challenge](https://hilti-challenge.com/) | мультисенсорні послідовності з будмайданчиків, щорічний челендж | SLAM у важких умовах |
+| [Middlebury Stereo](https://vision.middlebury.edu/stereo/), [ETH3D](https://www.eth3d.net/) | стереопари й багаторакурсні сцени з точною глибиною, лідерборди | Стерео, demo заняття 2; ETH3D — також SLAM і MVS |
+| [HPatches](https://github.com/hpatches/hpatches-dataset), [MegaDepth](https://www.cs.cornell.edu/projects/megadepth/) | зміни ракурсу й освітлення; пари з відомою геометрією | Оцінка й навчання детекторів та матчерів точок |
+| [Image Matching Challenge](https://image-matching-challenge.github.io/) | щорічний челендж CVPR на Kaggle: SfM з «диких» фото | Порівняння конвеєрів зіставлення наживо |

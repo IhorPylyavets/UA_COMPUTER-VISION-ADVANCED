@@ -40,3 +40,35 @@
 | [Yejin0111/AICITY2022-Track1-MTMC](https://github.com/Yejin0111/AICITY2022-Track1-MTMC) | 1-ше місце AI City 2022 (Track 1), на PaddleDetection |
 | [coder-wangzhen/AIC22-MCVT](https://github.com/coder-wangzhen/AIC22-MCVT) | 2-ге місце AI City 2022 (Track 1) |
 | [SherryJYC/paper-MTMC](https://github.com/SherryJYC/paper-MTMC) | Список статей з MTMC |
+
+## Датасети та бенчмарки
+
+**MOT:**
+
+| Датасет | Що в ньому | Для чого |
+|---|---|---|
+| [MOT17 / MOT20](https://motchallenge.net/data/MOT17/) | пішоходи, статичні й рухомі камери; MOT20 — дуже щільні натовпи | Стандартна таблиця HOTA / IDF1 (слайд 22) |
+| [DanceTrack](https://dancetrack.github.io/), [SportsMOT](https://github.com/MCG-NJU/SportsMOT) | однаковий вигляд, нелінійний рух | Асоціація, коли ReID не допомагає |
+| [VisDrone-MOT](https://github.com/VisDrone/VisDrone-Dataset), [UAVDT](https://sites.google.com/view/grli-uavdt/) | траєкторії з дронів, дрібні об'єкти, рух камери | Найближче до розвідувального БпЛА (кейс 1) |
+| [MDMT](https://huggingface.co/datasets/mrhwl123/MDMT) | два дрони, спільні ID між ними (CVAT XML) | Демо заняття 9 і ДЗ 4 |
+
+**SOT:**
+
+| Датасет | Що в ньому | Для чого |
+|---|---|---|
+| [LaSOT](http://vision.cs.stonybrook.edu/~lasot/), [GOT-10k](http://got-10k.aitestunion.com/), [TrackingNet](https://github.com/SilvioGiancola/TrackingNet-devkit) | довгі послідовності; GOT-10k — класи тесту не перетинаються з train | Стандартна трійка для SOT |
+| [UAV123](https://ivul.kaust.edu.sa/benchmark-and-simulator-uav-tracking-dataset), [DTB70](https://github.com/flyers/drone-tracking) | супровід з дрона, швидкий рух камери | SOT на гімбалі |
+| [Anti-UAV](https://github.com/ZhaoJ9014/Anti-UAV) | RGB + IR відео з дронами-цілями | Супровід дронів, IR (кейс 2) |
+| [VOT Challenge](https://www.votchallenge.net/) | щорічний челендж: short-term, long-term, RGB-T, RGB-D | Перевірка на свіжих даних |
+
+**MTMC і ReID:**
+
+| Датасет | Що в ньому | Для чого |
+|---|---|---|
+| [AI City Challenge](https://www.aicitychallenge.org/) (CityFlowV2) | міська мережа камер, авто; щорічні треки MTMC | Основний бенчмарк MTMC для техніки |
+| [WILDTRACK](https://www.epfl.ch/labs/cvlab/data/data-wildtrack/) | 7 камер з перекриттям, каліброваних, пішоходи | Асоціація через спільну площину землі |
+| [MMPTrack](https://iccv2021-mmp.github.io/), [MTMMC](https://sites.google.com/view/mtmmc) | MMPTrack — багатокамерні сцени в приміщенні; MTMMC — кампус і цех, RGB + тепловізор | Довгі ID через багато камер |
+| [VeRi-776](https://github.com/VehicleReId/VeRidataset) | ReID авто з 20 камер | ReID техніки |
+| [Market-1501](https://zheng-lab-anu.github.io/Project/project_reid.html), [MSMT17](http://www.pkuvmc.com/dataset.html) | ReID пішоходів | Стандартні бенчмарки (зручно через [torchreid](https://github.com/KaiyangZhou/deep-person-reid)). DukeMTMC автори відкликали — не використовуйте |
+
+Ліцензії майже всіх перелічених датасетів — лише для досліджень; перед використанням у продукті перевір.

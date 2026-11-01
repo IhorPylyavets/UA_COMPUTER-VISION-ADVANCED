@@ -20,3 +20,12 @@
 | [NVlabs/instant-ngp](https://github.com/NVlabs/instant-ngp) | hash-grid NeRF, SDF, зображення | Найшвидший старт з GUI; ліцензія NVIDIA (некомерційна) |
 
 Список статей і коду з 3DGS: [MrNeRF/awesome-3D-gaussian-splatting](https://github.com/MrNeRF/awesome-3D-gaussian-splatting).
+
+## Датасети та бенчмарки
+
+| Датасет | Що в ньому | Для чого |
+|---|---|---|
+| [Mip-NeRF 360](https://jonbarron.info/mipnerf360/) | 9 необмежених сцен 360° | Стандартна таблиця PSNR / SSIM / LPIPS для NeRF і 3DGS |
+| [Tanks and Temples](https://www.tanksandtemples.org/) | великі сцени з лазерним GT, онлайн-оцінка | Реконструкція геометрії, а не лише рендер |
+| [DL3DV-10K](https://dl3dv-10k.github.io/DL3DV-10K/) | понад 10 тис. відео сцен з позами | Масштабна оцінка й навчання feed-forward моделей |
+| [Mill 19](https://github.com/cmusatyalab/mega-nerf), [UrbanScene3D](https://vcc.tech/UrbanScene3D) | аерозйомка великих територій з дрона | Найближче до задач курсу: NeRF / 3DGS на аерофото |
