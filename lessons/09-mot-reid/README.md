@@ -42,3 +42,5 @@ HOTA / DetA / AssA рахує TrackEval — він уже в кореневом�
 - ДЕМО 03: при розсинхроні 300 мс ID persistence для авто ≈ 0; оцінка зсуву з треків — ≈ 320 мс; після компенсації — 1.0.
 
 Після §6 ДЕМО 02 є експорт у формат MOTChallenge для TrackEval — у `outputs/mot_export/` поруч із ноутбуком (тека в `.gitignore`).
+
+Збірки трекерів SOT / MOT / MTMC на GitHub — у [`docs/resources/tracking.md`](../../docs/resources/tracking.md).
