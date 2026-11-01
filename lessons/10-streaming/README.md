@@ -92,3 +92,5 @@ numpy 1, навпаки — ні). Windows і macOS — через WSL2 / Linux-
   200 кбіт/с (9), піднімає recall з 85 % до 96 %, але на сирих кадрах дає ≈ 4 хибних спрацювання на кадр.
 
 ДЕМО 04 зберігає підсумок у `outputs/demo4_results.json` поруч із ноутбуком (тека в `.gitignore`).
+
+Рантайми, Jetson і DeepStream — у [`docs/resources/edge.md`](../../docs/resources/edge.md).

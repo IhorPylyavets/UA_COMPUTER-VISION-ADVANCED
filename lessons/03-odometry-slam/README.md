@@ -55,3 +55,5 @@ python lessons/03-odometry-slam/lesson03_demo1_kitti_rerun.py --frames 800 --est
 - A. Geiger, P. Lenz, R. Urtasun. [Are we ready for Autonomous Driving? The KITTI Vision Benchmark Suite](https://www.cvlibs.net/publications/Geiger2012CVPR.pdf), CVPR 2012.
 - J. Sturm et al. [A Benchmark for the Evaluation of RGB-D SLAM Systems](https://doi.org/10.1109/IROS.2012.6385773), IROS 2012 — ATE і RPE.
 - [evo](https://github.com/MichaelGrupp/evo) — оцінка траєкторій з командного рядка.
+
+Збірки бібліотек для одометрії та SLAM — у [`docs/resources/geometry-slam.md`](../../docs/resources/geometry-slam.md).

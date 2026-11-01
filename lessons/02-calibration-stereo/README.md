@@ -111,3 +111,5 @@ RAFT іде з `torchvision`, ваги (~20 МБ) завантажаться с�
 - Z. Teed, J. Deng. [RAFT: Recurrent All-Pairs Field Transforms for Optical Flow](https://arxiv.org/abs/2003.12039).
   ECCV 2020 (demo4).
 - [Middlebury Stereo Datasets](https://vision.middlebury.edu/stereo/data/scenes2014/) — пари з істиною (demo4).
+
+Збірки бібліотек для калібрування, зіставлення й SLAM — у [`docs/resources/geometry-slam.md`](../../docs/resources/geometry-slam.md).
