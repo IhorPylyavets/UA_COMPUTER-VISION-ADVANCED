@@ -20,7 +20,7 @@
 | 8 | Адаптація, керування та синтез даних | 2 | [✔](homework/03-diffusion-lora/) |
 | 9 | [Multi-Object Tracking та Re-Identification](lessons/09-mot-reid/) | 3 | [✔](homework/04-mot-reid/) |
 | 10 | [Відео-пайплайни та low-latency стрімінг](lessons/10-streaming/) | 3 |  |
-| 11 | Крос-сенсорна інтеграція: RGB + LiDAR / Radar | 4 | ✔ |
+| 11 | [Крос-сенсорна інтеграція: RGB + LiDAR / Radar](lessons/11-rgb-lidar-radar-fusion/) | 4 | [✔](homework/05-lidar-rgb-range/) |
 | 12 | Мультиспектральне злиття: RGB + тепловізори | 4 |  |
 | 13 | Active Learning, DVC та XAI | 5 | ✔ |
 | 14 | Продакшн-сервінг моделей | 5 |  |
