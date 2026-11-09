@@ -2,12 +2,18 @@
 
 Одне ДЗ — одна тека `NN-slug/`: ноутбук для студента, README з кроками й оцінюванням, `solution/` для викладача.
 
-| № | ДЗ | Заняття |
-|---|---|---|
-| 1 | [Ознаки, аутлаєри та ICP](01-features-icp/) | [Оцінка руху та основи SLAM](../lessons/03-odometry-slam/) |
-| 2 | [Grounded-SAM 2: маски на відео без донавчання](02-grounded-sam2-video/) | [Zero-shot сегментація та Open-Vocabulary детекція](../lessons/06-zero-shot-segmentation/) |
-| 3 | [Stable Diffusion: генерація, гіперпараметри й DreamBooth-LoRA](03-diffusion-lora/) | Адаптація, керування та синтез даних |
-| 4 | [Крос-камерний трекер на MDMT](04-mot-reid/) | [Multi-Object Tracking та Re-Identification](../lessons/09-mot-reid/) |
+| № | ДЗ | Заняття | Бали |
+|---|---|---|---|
+| 1 | [Ознаки, аутлаєри та ICP](01-features-icp/) | [Оцінка руху та основи SLAM](../lessons/03-odometry-slam/) | 20 |
+| 2 | [Grounded-SAM 2: маски на відео без донавчання](02-grounded-sam2-video/) | [Zero-shot сегментація та Open-Vocabulary детекція](../lessons/06-zero-shot-segmentation/) | 15 |
+| 3 | [Stable Diffusion: генерація, гіперпараметри й DreamBooth-LoRA](03-diffusion-lora/) | Адаптація, керування та синтез даних | 15 |
+| 4 | [Крос-камерний трекер на MDMT](04-mot-reid/) | [Multi-Object Tracking та Re-Identification](../lessons/09-mot-reid/) | 20 |
+| 5 | [LiDAR → RGB: перевірка дальності до об'єктів](05-lidar-rgb-range/) | [RGB + LiDAR / Radar](../lessons/11-rgb-lidar-radar-fusion/) | 20 |
+| 6 | готується | Active Learning, DVC та XAI | 20 |
+| 7 | готується | Квантизація моделей | 20 |
+| 8 | готується | System Design: Проєктування архітектури CV-систем | 20 |
+| — | Курсовий проєкт | Курсовий проєкт | 50 |
+| | **Разом** | | **200** |
 
 Студенти завантажують ноутбук, виконують його у своєму середовищі, пакують виконаний ноутбук і файли, які просить
 README завдання, в **один архів** і прикріплюють його в особистому кабінеті LMS. Комітити в репозиторій не потрібно.

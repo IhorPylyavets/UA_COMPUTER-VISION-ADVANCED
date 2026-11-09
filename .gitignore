@@ -21,6 +21,9 @@ outputs/
 .idea/
 .vscode/
 
+# Розв'язки ДЗ — лише у викладача, у репозиторій не потрапляють
+homework/*/solution/
+
 # Артефакти: ваги й датасети тримаємо поза git, лишаємо тільки структуру.
 # artifacts/images/ комітимо: фото для демо невеликі й потрібні одразу після клонування.
 artifacts/models/**
@@ -29,6 +32,7 @@ artifacts/middlebury/**
 artifacts/calibration_demo/**
 artifacts/visdrone/**
 artifacts/mdmt/**
+artifacts/rgbt/**
 artifacts/aerial_video/**
 lessons/05-vit-multimodal/gt/own_queries.csv
 backup

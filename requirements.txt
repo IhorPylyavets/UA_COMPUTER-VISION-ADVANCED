@@ -2,7 +2,7 @@
 torch
 torchvision
 opencv-python
-numpy
+numpy>=2.0          # np.trapezoid (заняття 12, sim12.py)
 matplotlib
 ultralytics>=8.3.100   # з 8.3 — YOLO11, з 8.3.100 — YOLOE (заняття 6)
 transformers>=5.0    # з 4.56 — DINOv3 (заняття 5), з 5.0 — SAM 3 і Florence-2 без trust_remote_code (заняття 6)

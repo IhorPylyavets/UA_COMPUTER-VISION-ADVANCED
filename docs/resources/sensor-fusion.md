@@ -12,6 +12,15 @@
 | [mit-han-lab/bevfusion](https://github.com/mit-han-lab/bevfusion) | BEVFusion: камера + LiDAR у спільному BEV | Архівовано; ті самі моделі є в OpenPCDet і MMDetection3D |
 | [nutonomy/nuscenes-devkit](https://github.com/nutonomy/nuscenes-devkit) | завантаження nuScenes (6 камер, LiDAR, 5 радарів), проєкції, метрики NDS / mAP | Головний датасет із радаром |
 
+## RGB + LiDAR / Radar: калібрування та фільтрація
+
+Робочі інструменти до практики заняття 11 (калібрування extrinsic і EKF). Це не збірки методів, а окремі інструменти.
+
+| Репозиторій | Що всередині | Примітка |
+|---|---|---|
+| [koide3/direct_visual_lidar_calibration](https://github.com/koide3/direct_visual_lidar_calibration) | калібрування LiDAR–камера без мішені: початкове наближення через SuperGlue + RANSAC, уточнення за NID | ROS1 / ROS2, MIT; стаття — [arXiv 2302.05094](https://arxiv.org/abs/2302.05094) |
+| [rlabbe/Kalman-and-Bayesian-Filters-in-Python](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python) | книга в Jupyter: фільтр Калмана, EKF, UKF, частинкові фільтри; вправи з розв'язками | EKF — розділ 11; база до блоку EKF заняття 11 |
+
 ## RGB + тепловізор
 
 | Репозиторій | Що всередині | Примітка |

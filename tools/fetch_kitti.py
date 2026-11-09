@@ -5,14 +5,18 @@
     vocab     05: ліва сіра image_0 (2761 кадр), calib.txt, times.txt, poses/05.txt     ≈ 0,7 ГБ   demo3, словник BoW
     reference траєкторії-еталони KISS-ICP і ORB-SLAM3 stereo (необов'язково)               ≈ 2 МБ     demo3
 
-Це копія офіційних даних (https://www.cvlibs.net/datasets/kitti/eval_odometry.php, ліцензія
-CC BY-NC-SA 3.0 — лише некомерційне використання), перепакована tools/pack_kitti.py, щоб не
-качати десятки гігабайт заради двох послідовностей.
+Окремо, з --object — KITTI object для заняття 11 (odometry тоді не качається):
+    object    training/ 000000–000199: velodyne, image_2, calib, label_2                  ≈ 0,4 ГБ   demo3, ДЗ 11
+
+Це копія офіційних даних (https://www.cvlibs.net/datasets/kitti/eval_odometry.php і
+https://www.cvlibs.net/datasets/kitti/eval_object.php, ліцензія CC BY-NC-SA 3.0 — лише некомерційне
+використання), перепакована, щоб не качати десятки гігабайт заради кількох сотень кадрів.
 
 Вже розпаковані частини пропускаються, тож скрипт можна перезапускати. Обірване завантаження
 починається спочатку.
 
 Запуск з кореня репозиторію:  python tools/fetch_kitti.py [--no-lidar] [--keep-zip]
+                              python tools/fetch_kitti.py --object       # заняття 11
 """
 import argparse
 import re
@@ -35,6 +39,9 @@ PARTS = {
     # необов'язкова: без посилання просто пропускається; збирає викладач (demo3 + tools/orbslam3_kitti.sh)
     "reference": dict(file="kitti_reference.zip", drive="", optional=True,
                       done="reference/kiss_icp_00.txt"),
+    # KITTI object, заняття 11: лише з --object
+    "object": dict(file="kitti_object_200.zip", drive="1RHrgod9eXdBi9PuMh5DJ-T89nEY8xqHg",
+                   done="object/training/label_2/000199.txt"),
 }
 OUT = Path(__file__).resolve().parent.parent / "artifacts" / "kitti"
 DOWNLOAD = "https://drive.usercontent.google.com/download"
@@ -103,10 +110,13 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--no-lidar", action="store_true", help="лише core, без сканів LiDAR (demo1 тоді не запрацює)")
     ap.add_argument("--keep-zip", action="store_true", help="не видаляти архіви після розпакування")
+    ap.add_argument("--object", action="store_true", help="лише KITTI object для заняття 11 (≈ 0,4 ГБ), без odometry")
     args = ap.parse_args()
 
     staging = OUT / "_download"
     for name, part in PARTS.items():
+        if (name == "object") != args.object:
+            continue
         if name == "velodyne" and args.no_lidar:
             continue
         if (OUT / part["done"]).exists():

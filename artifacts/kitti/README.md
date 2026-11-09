@@ -1,6 +1,7 @@
 # KITTI odometry
 
-Дані для заняття 3. У git не потрапляють — лише цей README.
+Дані для заняття 3. У git не потрапляють — лише цей README. KITTI object для заняття 11 — у розділі
+[KITTI object](#kitti-object-заняття-11) наприкінці.
 
 ## Швидко: з Google Drive курсу
 
@@ -107,3 +108,29 @@ python tools/pack_kitti.py --reference-only --out <тека>   # -> kitti_refere
 
 На macOS скрипт не працює (немає `apt`, ORB-SLAM3 офіційно не збирається) і зупиняється з поясненням.
 Посилання на новий архів вписується в `PARTS['reference']['drive']` у `tools/fetch_kitti.py`.
+
+## KITTI object (заняття 11)
+
+Для LIVE DEMO 1–3 і ДЗ 11 (`homework/05-lidar-rgb-range`): перші 200 кадрів `training/` з
+[KITTI 3D object](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d) — хмара Velodyne, ліва кольорова
+камера, калібрування і розмітка.
+
+```
+python tools/fetch_kitti.py --object     # kitti_object_200.zip, ≈ 0,4 ГБ; odometry при цьому не качається
+```
+
+```
+artifacts/kitti/object/training/
+    velodyne/000000.bin … 000199.bin     float32 × 4: x, y, z, відбивна здатність
+    image_2/000000.png  … 000199.png     ліва кольорова камера
+    calib/000000.txt    … 000199.txt     P0–P3, R0_rect, Tr_velo_to_cam, Tr_imu_to_velo
+    label_2/000000.txt  … 000199.txt     клас, truncated, occluded, 2D-бокс, h w l, location (rect cam0), ry
+```
+
+Архів зібрано з офіційних `data_object_{velodyne,image_2,calib,label_2}.zip`:
+```bash
+for a in velodyne image_2 calib label_2; do
+  unzip -n data_object_$a.zip "training/$a/0000??.*" "training/$a/0001??.*" -d artifacts/kitti/object
+done
+cd artifacts/kitti && zip -qr -1 kitti_object_200.zip object/training
+```
